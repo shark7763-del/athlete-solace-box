@@ -193,6 +193,15 @@
   .sync-badge.err{background:rgba(232,99,91,.35);}
   .sync-badge.loading{background:rgba(247,178,103,.35);}
 
+  .reply-card{background:linear-gradient(135deg,#fff6ec,#fff);border:1.5px solid var(--orange-soft);
+    border-radius:16px;padding:15px 16px;margin-top:10px;box-shadow:var(--shadow-sm);}
+  .reply-card .from{font-size:12.5px;font-weight:800;color:var(--orange);display:flex;align-items:center;gap:6px;margin-bottom:7px;}
+  .reply-card .body{font-size:15px;color:var(--ink);white-space:pre-wrap;line-height:1.7;}
+  .inbox-entry{background:#fff;border-radius:16px;padding:15px 16px;box-shadow:var(--shadow-sm);margin-bottom:13px;}
+  .inbox-entry .top{display:flex;justify-content:space-between;align-items:center;}
+  .inbox-entry .d{font-size:12.5px;color:var(--muted);}
+  .waiting{background:var(--cream);border-radius:14px;padding:13px 15px;font-size:13.5px;color:var(--navy-2);margin-top:10px;text-align:center;}
+
   /* 家長 / 教練 能量條 */
   .energy{height:14px;border-radius:8px;background:#eee2cf;overflow:hidden;margin:6px 0;}
   .energy>div{height:100%;border-radius:8px;background:linear-gradient(90deg,var(--orange-soft),var(--orange));}
@@ -226,6 +235,10 @@
       <div class="role-card" onclick="go('parent')">
         <span class="emoji">🏡</span><div class="t">家長端</div><div class="d">陪伴建議</div>
       </div>
+    </div>
+    <div class="role-card" style="margin-top:14px;display:flex;align-items:center;gap:14px;text-align:left" onclick="go('inbox')">
+      <span class="emoji" style="margin:0;font-size:32px">📨</span>
+      <div><div class="t">查看心理教練的回覆</div><div class="d">輸入你的名字，看看有沒有人回你 💬</div></div>
     </div>
     <div class="footer-note">
       ⚠️ 本系統為心理支持與關懷工具，<b>並非醫療診斷工具</b>。<br>
@@ -277,6 +290,26 @@
   </div>
 </div>
 
+<!-- ========== 選手查看回覆（我的信箱） ========== -->
+<div id="view-inbox" class="hide">
+  <header class="app">
+    <button class="back" onclick="go('home')">‹ 返回首頁</button>
+    <h1>我的解憂信箱 📨</h1>
+    <div class="sub">看看心理教練有沒有回你的訊息。</div>
+    <div id="sync-status2" class="sync-badge"></div>
+  </header>
+  <div class="wrap">
+    <div class="card">
+      <label class="field">請輸入你的名字（要和送出時一樣喔）</label>
+      <div class="row">
+        <div style="flex:2"><input type="text" id="i-name" placeholder="你的名字"></div>
+        <div style="flex:1"><button class="btn navy" style="padding:12px" onclick="inboxSearch()">查詢</button></div>
+      </div>
+    </div>
+    <div id="inbox-result"></div>
+  </div>
+</div>
+
 <!-- ========== 送出鼓勵 ========== -->
 <div id="view-thanks" class="hide">
   <div class="wrap">
@@ -285,7 +318,8 @@
       <h2 id="thanks-title">謝謝你願意說出口</h2>
       <p id="thanks-msg"></p>
       <div id="thanks-risk" class="alert danger hide" style="margin-top:18px;text-align:left"></div>
-      <button class="btn navy" style="margin-top:22px" onclick="go('home')">回到首頁</button>
+      <button class="btn" style="margin-top:22px" onclick="go('inbox')">之後來這裡看回覆 📨</button>
+      <button class="btn ghost" style="margin-top:10px" onclick="go('home')">回到首頁</button>
     </div>
   </div>
 </div>
@@ -402,7 +436,7 @@ function save(d){localStorage.setItem(STORE_KEY,JSON.stringify(d));}
 
 /* ============ 雲端 API（GAS_URL 有填才啟用） ============ */
 const CLOUD = !!GAS_URL;
-function setSync(txt,cls){const el=$("sync-status");if(el){el.textContent=txt;el.className="sync-badge "+(cls||"");}}
+function setSync(txt,cls){["sync-status","sync-status2"].forEach(id=>{const el=$(id);if(el){el.textContent=txt;el.className="sync-badge "+(cls||"");}});}
 async function serverList(){
   const res=await fetch(GAS_URL,{method:"GET"});
   const j=await res.json();
@@ -434,7 +468,7 @@ function fmtDate(d){return d;}
 function todayStr(){const t=new Date();return t.getFullYear()+"-"+String(t.getMonth()+1).padStart(2,"0")+"-"+String(t.getDate()).padStart(2,"0");}
 
 /* ============ 視圖切換 ============ */
-const VIEWS=["home","athlete","thanks","psych","coach","parent"];
+const VIEWS=["home","athlete","inbox","thanks","psych","coach","parent"];
 async function go(v){
   VIEWS.forEach(x=>$("view-"+x).classList.add("hide"));
   $("view-"+v).classList.remove("hide");
@@ -443,6 +477,7 @@ async function go(v){
   if(v==="psych"){renderPsych();await syncFromServer();renderPsych();}
   if(v==="coach"){renderCoach();await syncFromServer();renderCoach();}
   if(v==="parent"){$("parent-result").innerHTML="";$("p-name").value="";}
+  if(v==="inbox"){$("inbox-result").innerHTML="";$("i-name").value="";}
 }
 function loginGate(role){
   // 簡易門檻：心理教練/教練需密碼（示範用，可自行調整）
@@ -795,6 +830,39 @@ function clearAll(){if(confirm("確定清空所有回報資料？此動作無法
 
 /* ============ 家長查詢：雲端模式先同步 ============ */
 async function parentSearch(){ if(CLOUD) await syncFromServer(); doParentSearch(); }
+
+/* ============ 選手查看回覆（我的信箱） ============ */
+async function inboxSearch(){
+  const name=$("i-name").value.trim();
+  if(!name){alert("請輸入你的名字");return;}
+  if(CLOUD) await syncFromServer();
+  const mine=load().filter(r=>r.name===name);
+  if(!mine.length){
+    $("inbox-result").innerHTML=`<div class="card empty">查不到「${esc(name)}」的紀錄。<br>確認名字和你送出時填的一樣，或先去「選手端」寫一篇吧 🙂</div>`;
+    return;
+  }
+  // 依時間新到舊
+  mine.sort((a,b)=>new Date(b.ts)-new Date(a.ts));
+  const replied=mine.filter(r=>r.reply).length;
+  $("inbox-result").innerHTML=
+    `<div class="card" style="text-align:center">
+      <h2>嗨，${esc(name)} 👋</h2>
+      <p class="muted" style="margin-top:6px">你總共寫了 ${mine.length} 篇，心理教練已回覆 ${replied} 篇 💌</p>
+    </div>` +
+    mine.map(r=>{
+      const replyHtml = r.reply
+        ? `<div class="reply-card"><div class="from">💬 心理教練的回覆</div><div class="body">${esc(r.reply)}</div></div>`
+        : (r.wantReply
+            ? `<div class="waiting">⏳ 心理教練還沒回覆，再等等喔。你的心情我們有收到 🤍</div>`
+            : `<div class="waiting">這篇你當時沒有要求回覆。需要的話隨時再寫一篇 🙂</div>`);
+      return `<div class="inbox-entry">
+        <div class="top"><span style="font-weight:800;color:var(--navy)">${MOODS[r.mood]?MOODS[r.mood].e:""} ${r.date}</span>
+          ${r.reply?'<span class="status-tag done">已回覆</span>':'<span class="status-tag">等待中</span>'}</div>
+        <div class="d" style="margin-top:6px">你當時寫：${esc(r.q1)||'（未填困擾）'}</div>
+        ${replyHtml}
+      </div>`;
+    }).join("");
+}
 
 /* ============ 啟動 ============ */
 $("a-date")&&($("a-date").value=todayStr());
