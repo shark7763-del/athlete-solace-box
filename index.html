@@ -251,9 +251,6 @@
       <div class="role-card" onclick="loginGate('coach')">
         <span class="emoji">📋</span><div class="t">教練端</div><div class="d">帶隊提醒</div>
       </div>
-      <div class="role-card" onclick="go('parent')">
-        <span class="emoji">🏡</span><div class="t">家長端</div><div class="d">陪伴建議</div>
-      </div>
     </div>
     <div class="role-card" style="margin-top:14px;display:flex;align-items:center;gap:14px;text-align:left" onclick="go('inbox')">
       <span class="emoji" style="margin:0;font-size:32px">📨</span>
@@ -395,25 +392,6 @@
   </div>
 </div>
 
-<!-- ========== 家長端 ========== -->
-<div id="view-parent" class="hide">
-  <header class="app">
-    <button class="back" onclick="go('home')">‹ 返回首頁</button>
-    <h1>家長陪伴專區 🏡</h1>
-    <div class="sub">看看孩子這週的心理能量，學會怎麼陪伴。</div>
-  </header>
-  <div class="wrap">
-    <div class="card">
-      <label class="field">請輸入孩子的姓名查詢</label>
-      <div class="row">
-        <div style="flex:2"><input type="text" id="p-name" placeholder="孩子的名字"></div>
-        <div style="flex:1"><button class="btn navy" style="padding:12px" onclick="parentSearch()">查詢</button></div>
-      </div>
-    </div>
-    <div id="parent-result"></div>
-  </div>
-</div>
-
 <!-- ========== 詳細 Modal（心理教練） ========== -->
 <div class="modal-bg" id="modal-bg">
   <div class="modal" id="modal-content"></div>
@@ -498,7 +476,7 @@ function normalizeName(s){return String(s||"").trim().replace(/\s+/g,"").toLower
 function bySameName(name){const key=normalizeName(name);return r=>normalizeName(r.name)===key;}
 
 /* ============ 視圖切換 ============ */
-const VIEWS=["home","athlete","inbox","thanks","psych","coach","parent"];
+const VIEWS=["home","athlete","inbox","thanks","psych","coach"];
 async function go(v){
   VIEWS.forEach(x=>$("view-"+x).classList.add("hide"));
   $("view-"+v).classList.remove("hide");
@@ -506,7 +484,6 @@ async function go(v){
   if(v==="athlete")initAthleteForm();
   if(v==="psych"){renderPsych();await syncFromServer();renderPsych();}
   if(v==="coach"){renderCoach();await syncFromServer();renderCoach();}
-  if(v==="parent"){$("parent-result").innerHTML="";$("p-name").value="";}
   if(v==="inbox"){$("inbox-result").innerHTML="";$("i-name").value="";}
 }
 function loginGate(role){
@@ -774,64 +751,6 @@ function renderCoach(){
     </div>`).join("");
 }
 
-/* ============ 家長端 ============ */
-function doParentSearch(){
-  const name=$("p-name").value.trim();
-  if(!name){alert("請輸入孩子的姓名");return;}
-  const data=load().filter(bySameName(name));
-  if(!data.length){$("parent-result").innerHTML=`<div class="card empty">查無「${esc(name)}」的紀錄，請確認姓名是否正確。</div>`;return;}
-  // 本週（近7天）資料
-  const now=new Date();
-  const week=data.filter(r=>(now-new Date(r.ts))<=7*864e5);
-  const use=week.length?week:data.slice(0,5);
-  // 能量分數：平均 wellness
-  let sum=0;
-  use.forEach(r=>{
-    let pos=["confidence","focus","motivation","sleep","emotion"];let t=0,n=0;
-    pos.forEach(k=>{t+=r.scales[k];n++;});t+=(6-r.scales.anxiety);n++;t+=(6-r.scales.giveup);n++;
-    sum+=t/n;
-  });
-  const avg=sum/use.length; // 1~5
-  const energy=Math.round(avg/5*100);
-  const lights=use.map(computeLight);
-  const redCnt=lights.filter(l=>l==="red").length;
-  const level = avg>=3.6?"green":avg>=2.8?"yellow":"red";
-  const levelTxt = level==="green"?"能量充足，狀態穩定 🌿":level==="yellow"?"略顯疲累，需要陪伴 🍂":"能量偏低，請多關心 🤍";
-
-  const sayGood = level==="green"
-    ? ["「我看到你最近很努力，辛苦了。」","「不管結果如何，你願意去做就很棒。」","「需要的時候，爸媽都在。」"]
-    : level==="yellow"
-    ? ["「最近累不累？想聊聊嗎？」","「你不需要每次都表現完美。」","「我們一起想辦法，不急。」"]
-    : ["「我有點擔心你，願意跟我說說嗎？」","「無論發生什麼，我都站在你這邊。」","「你比任何成績都重要。」"];
-  const sayAvoid = ["「你怎麼又這樣？」「別人都可以你為什麼不行？」",
-    "「花這麼多錢練，你對得起我們嗎？」","「不要找藉口／你就是不夠努力。」",
-    "「哭什麼哭，要堅強一點。」"];
-
-  $("parent-result").innerHTML=`
-    <div class="card">
-      <h2>${esc(name)} 的本週心理能量</h2>
-      <div class="hint">統計近 ${use.length} 筆回報（${week.length?"本週":"最近"}）</div>
-      <div style="display:flex;align-items:center;gap:12px;margin-top:6px">
-        <div style="flex:1">
-          <div class="energy"><div style="width:${energy}%"></div></div>
-          <div class="muted" style="font-size:12px">心理能量 ${energy}%</div>
-        </div>
-        <span class="light ${level}"><span class="b"></span>${level==="green"?"穩定":level==="yellow"?"需關心":"請留意"}</span>
-      </div>
-      <p style="margin-top:12px;font-weight:700;color:var(--navy)">${levelTxt}</p>
-      ${redCnt>0?`<div class="alert info" style="margin-top:12px">本週有 ${redCnt} 天孩子的狀態偏低，建議多花時間陪伴，並可與心理教練聯繫。</div>`:""}
-    </div>
-
-    <div class="card">
-      <div class="section-label" style="margin-top:0"><span class="dot"></span>建議這樣說 👍</div>
-      ${sayGood.map(s=>`<div class="say-box good">${esc(s)}</div>`).join("")}
-      <div class="section-label"><span class="dot"></span>避免這樣說 🚫</div>
-      ${sayAvoid.map(s=>`<div class="say-box avoid">${esc(s)}</div>`).join("")}
-    </div>
-    <div class="footer-note">本系統提供的是陪伴參考，非醫療診斷。若孩子出現持續低落或危險訊號，請尋求專業心理或醫療協助，緊急時撥打 1925／1995／110。</div>
-  `;
-}
-
 /* ============ 工具：示範 / 匯出 / 清空 ============ */
 function seedDemo(){
   if(load().length && !confirm("將加入示範資料，確定？")) return;
@@ -896,9 +815,6 @@ function clearCloudAll(){
     .then(()=>{renderPsych();alert("已清空雲端資料");})
     .catch(e=>{console.warn("雲端清空失敗",e);alert("雲端清空失敗，請檢查連線或 Apps Script 權限。");});
 }
-
-/* ============ 家長查詢：雲端模式先同步 ============ */
-async function parentSearch(){ if(CLOUD) await syncFromServer(); doParentSearch(); }
 
 /* ============ 選手查看回覆（我的信箱） ============ */
 async function inboxSearch(){
