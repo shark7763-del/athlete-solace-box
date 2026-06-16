@@ -210,6 +210,25 @@
   .say-box.avoid{background:#fde9e8;border-left:5px solid var(--red);}
   .say-box .t{font-weight:800;font-size:12.5px;margin-bottom:5px;}
   .say-box.good .t{color:#2f8a52;} .say-box.avoid .t{color:#c93f37;}
+  .crisis-card{background:#fff;border:1.5px solid #f3c6c2;border-left:6px solid var(--red);
+    border-radius:16px;padding:15px 16px;margin-top:14px;box-shadow:var(--shadow-sm);}
+  .crisis-card .t{font-weight:800;color:#9c2f29;margin-bottom:5px;}
+  .crisis-card .line{font-size:13.5px;color:var(--ink);}
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
+
+  @media (max-width:560px){
+    :root{--radius:16px;}
+    .wrap{padding:14px 12px 72px;}
+    header.app{padding:22px 16px 26px;border-radius:0 0 22px 22px;}
+    header.app h1{font-size:22px;}
+    .role-grid{grid-template-columns:1fr;gap:10px;margin-top:16px;}
+    .role-card{padding:17px 14px;}
+    .row{flex-direction:column;gap:10px;}
+    .mood-grid{grid-template-columns:repeat(2,1fr);}
+    .mini-scales{grid-template-columns:1fr;}
+    .btn-row .btn.sm{flex:1 1 calc(50% - 10px);}
+    .inbox-entry .top,.item .h{align-items:flex-start;flex-direction:column;}
+  }
 </style>
 </head>
 <body>
@@ -243,6 +262,10 @@
     <div class="footer-note">
       ⚠️ 本系統為心理支持與關懷工具，<b>並非醫療診斷工具</b>。<br>
       若你或孩子有立即危險，請立刻撥打 <b>110 / 119</b>、或安心專線 <b>1925</b>、生命線 <b>1995</b>，並尋求專業協助。
+    </div>
+    <div class="crisis-card">
+      <div class="t">緊急狀況請不要只等待系統回覆</div>
+      <div class="line">若出現自傷、輕生、失控衝動或立即安全疑慮，請立刻找身邊可信任的大人，並撥打 110 / 119 / 1925 / 1995。</div>
     </div>
   </div>
 </div>
@@ -351,8 +374,11 @@
     <div class="btn-row" style="margin-top:10px">
       <button class="btn ghost sm" onclick="seedDemo()">載入示範資料</button>
       <button class="btn ghost sm" onclick="exportData()">匯出 JSON</button>
-      <button class="btn ghost sm" onclick="clearAll()">清空全部</button>
+      <button class="btn ghost sm" onclick="document.getElementById('import-json').click()">匯入 JSON</button>
+      <button class="btn ghost sm" onclick="clearLocal()">清空本機</button>
+      <button class="btn ghost sm" onclick="clearCloudAll()">清空雲端</button>
     </div>
+    <input id="import-json" class="sr-only" type="file" accept="application/json" onchange="importData(event)">
   </div>
 </div>
 
@@ -400,6 +426,8 @@ const GAS_URL = "https://script.google.com/macros/s/AKfycbw4Xbg0ipAk9KpNWJPnxBMd
 
 /* ============ 資料設定 ============ */
 const STORE_KEY = "solace_box_records_v1";
+const PSYCH_PASSWORD = "mind123";
+const COACH_PASSWORD = "coach123";
 const MOODS = [
   {k:"很好",e:"😄",w:0},{k:"普通",e:"🙂",w:1},{k:"有點累",e:"😪",w:2},
   {k:"有壓力",e:"😣",w:3},{k:"很低落",e:"😞",w:4},{k:"不想說話",e:"🤐",w:4},
@@ -466,6 +494,8 @@ async function syncFromServer(){
 }
 function fmtDate(d){return d;}
 function todayStr(){const t=new Date();return t.getFullYear()+"-"+String(t.getMonth()+1).padStart(2,"0")+"-"+String(t.getDate()).padStart(2,"0");}
+function normalizeName(s){return String(s||"").trim().replace(/\s+/g,"").toLowerCase();}
+function bySameName(name){const key=normalizeName(name);return r=>normalizeName(r.name)===key;}
 
 /* ============ 視圖切換 ============ */
 const VIEWS=["home","athlete","inbox","thanks","psych","coach","parent"];
@@ -480,12 +510,12 @@ async function go(v){
   if(v==="inbox"){$("inbox-result").innerHTML="";$("i-name").value="";}
 }
 function loginGate(role){
-  // 簡易門檻：心理教練/教練需密碼（示範用，可自行調整）
+  // 簡易門檻：正式部署時請改成後端驗證；前端密碼只能降低誤入，不能當成真正資安。
   const pw = prompt(role==="psych"?"請輸入心理教練密碼：":"請輸入教練密碼：");
   if(pw===null) return;
-  const ok = role==="psych" ? (pw==="mind123"||pw==="") : (pw==="coach123"||pw==="");
+  const ok = role==="psych" ? (pw===PSYCH_PASSWORD) : (pw===COACH_PASSWORD);
   if(ok){ go(role); }
-  else { alert("密碼錯誤。\n（示範密碼：心理教練 mind123 / 教練 coach123，留空亦可進入）"); }
+  else { alert("密碼錯誤。\n心理教練：mind123 / 教練：coach123"); }
 }
 
 /* ============ 選手表單 ============ */
@@ -563,7 +593,7 @@ function coachAdvice(r,light){
 }
 
 /* ============ 送出 ============ */
-function submitAthlete(){
+async function submitAthlete(){
   const name=$("a-name").value.trim();
   if(!name){alert("請填寫姓名 🙂");return;}
   if(curMood===null){alert("選一個今天的心情吧 💛");return;}
@@ -581,7 +611,15 @@ function submitAthlete(){
   };
   const data=load(); data.unshift(rec); save(data);
   showThanks(rec);
-  if(CLOUD){ serverPost({action:"create",record:rec}).catch(e=>console.warn("雲端寫入失敗",e)); }
+  if(CLOUD){
+    try{
+      await serverPost({action:"create",record:rec});
+      setSync("☁ 已送出雲端","ok");
+    }catch(e){
+      setSync("⚠ 雲端送出失敗（已存本機）","err");
+      alert("已先存到這台裝置，但雲端送出失敗。請通知心理教練檢查網路或 Apps Script 部署。");
+    }
+  }
 }
 function showThanks(rec){
   go("thanks");
@@ -740,7 +778,7 @@ function renderCoach(){
 function doParentSearch(){
   const name=$("p-name").value.trim();
   if(!name){alert("請輸入孩子的姓名");return;}
-  const data=load().filter(r=>r.name===name);
+  const data=load().filter(bySameName(name));
   if(!data.length){$("parent-result").innerHTML=`<div class="card empty">查無「${esc(name)}」的紀錄，請確認姓名是否正確。</div>`;return;}
   // 本週（近7天）資料
   const now=new Date();
@@ -824,9 +862,40 @@ function exportData(){
   const a=document.createElement("a");a.href=URL.createObjectURL(blob);
   a.download="解憂信箱_資料_"+todayStr()+".json";a.click();
 }
-function clearAll(){if(confirm("確定清空所有回報資料？此動作無法復原。")){save([]);renderPsych();
-  if(CLOUD){ serverPost({action:"clear"}).catch(e=>console.warn("雲端清空失敗",e)); }
-  alert("已清空");}}
+function importData(e){
+  const file=e.target.files&&e.target.files[0];
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=()=>{
+    try{
+      const imported=JSON.parse(reader.result);
+      if(!Array.isArray(imported)) throw new Error("JSON 必須是紀錄陣列");
+      if(!confirm(`即將匯入 ${imported.length} 筆資料並覆蓋本機快取，確定？`)) return;
+      save(imported);
+      renderPsych();
+      alert("已匯入本機資料 ✅");
+    }catch(err){
+      alert("匯入失敗，請確認 JSON 格式正確。");
+    }finally{
+      e.target.value="";
+    }
+  };
+  reader.readAsText(file,"utf-8");
+}
+function clearLocal(){
+  if(confirm("確定清空這台裝置的本機資料？雲端資料不會被刪除。")){
+    save([]);renderPsych();alert("已清空本機資料");
+  }
+}
+function clearCloudAll(){
+  if(!CLOUD){alert("目前沒有設定雲端後端。");return;}
+  const code=prompt("這會刪除雲端試算表的全部回報。若確定，請輸入：清空雲端");
+  if(code!=="清空雲端") return;
+  serverPost({action:"clear"})
+    .then(()=>syncFromServer())
+    .then(()=>{renderPsych();alert("已清空雲端資料");})
+    .catch(e=>{console.warn("雲端清空失敗",e);alert("雲端清空失敗，請檢查連線或 Apps Script 權限。");});
+}
 
 /* ============ 家長查詢：雲端模式先同步 ============ */
 async function parentSearch(){ if(CLOUD) await syncFromServer(); doParentSearch(); }
@@ -836,7 +905,7 @@ async function inboxSearch(){
   const name=$("i-name").value.trim();
   if(!name){alert("請輸入你的名字");return;}
   if(CLOUD) await syncFromServer();
-  const mine=load().filter(r=>r.name===name);
+  const mine=load().filter(bySameName(name));
   if(!mine.length){
     $("inbox-result").innerHTML=`<div class="card empty">查不到「${esc(name)}」的紀錄。<br>確認名字和你送出時填的一樣，或先去「選手端」寫一篇吧 🙂</div>`;
     return;
