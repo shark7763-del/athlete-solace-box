@@ -49,6 +49,17 @@
   header.app .logo{font-size:13px;letter-spacing:3px;opacity:.85;}
   header.app h1{color:#fff;font-size:25px;margin-top:6px;}
   header.app .sub{font-size:13.5px;opacity:.9;margin-top:6px;}
+  .staff-toggle{position:absolute;right:16px;top:18px;z-index:2;width:auto;border:1px solid rgba(255,255,255,.35);
+    border-radius:999px;padding:8px 13px;background:rgba(255,255,255,.12);color:#fff;font-size:13px;
+    font-weight:800;box-shadow:none;}
+  .staff-menu{display:none;position:absolute;right:16px;top:58px;z-index:5;width:min(260px,calc(100vw - 32px));
+    background:#fff;border-radius:16px;padding:10px;box-shadow:0 12px 32px rgba(16,38,65,.24);color:var(--ink);}
+  .staff-menu.show{display:block;}
+  .staff-menu button{width:100%;border:0;background:transparent;text-align:left;border-radius:12px;padding:12px 13px;
+    font-family:inherit;cursor:pointer;color:var(--navy);}
+  .staff-menu button:hover{background:var(--cream);}
+  .staff-menu .t{display:block;font-weight:800;font-size:14px;}
+  .staff-menu .d{display:block;color:var(--muted);font-size:12px;margin-top:2px;}
 
   /* ---------- 角色卡 ---------- */
   .role-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:22px;}
@@ -62,6 +73,13 @@
   .role-card .emoji{font-size:38px;display:block;margin-bottom:8px;}
   .role-card .t{font-weight:800;color:var(--navy);font-size:17px;}
   .role-card .d{font-size:12px;color:var(--muted);margin-top:4px;}
+  .athlete-entry{max-width:640px;margin:22px auto 0;padding:28px 22px;}
+  .athlete-entry .emoji{font-size:48px;}
+  .athlete-entry .t{font-size:24px;}
+  .athlete-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px;}
+  .privacy-note{background:#eef7f1;border:1.5px solid #cae6d2;border-left:6px solid var(--green);
+    border-radius:16px;padding:14px 15px;margin:16px 0;color:#245a39;font-size:14px;}
+  .privacy-note b{color:#17482d;}
 
   /* ---------- 卡片 ---------- */
   .card{background:var(--card);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow-sm);margin-bottom:16px;}
@@ -221,8 +239,12 @@
     .wrap{padding:14px 12px 72px;}
     header.app{padding:22px 16px 26px;border-radius:0 0 22px 22px;}
     header.app h1{font-size:22px;}
+    .staff-toggle{right:12px;top:14px;padding:7px 10px;font-size:12px;}
+    .staff-menu{right:12px;top:50px;}
     .role-grid{grid-template-columns:1fr;gap:10px;margin-top:16px;}
     .role-card{padding:17px 14px;}
+    .athlete-entry{padding:22px 16px;}
+    .athlete-actions{grid-template-columns:1fr;}
     .row{flex-direction:column;gap:10px;}
     .mood-grid{grid-template-columns:repeat(2,1fr);}
     .mini-scales{grid-template-columns:1fr;}
@@ -236,25 +258,34 @@
 <!-- ========== 首頁：角色選擇 ========== -->
 <div id="view-home">
   <header class="app">
+    <button class="staff-toggle" type="button" onclick="toggleStaffMenu()">工作人員</button>
+    <div class="staff-menu" id="staff-menu">
+      <button type="button" onclick="staffGo('psych')">
+        <span class="t">心理教練後台</span>
+        <span class="d">查看私密留言、回覆與追蹤</span>
+      </button>
+      <button type="button" onclick="staffGo('coach')">
+        <span class="t">教練端</span>
+        <span class="d">只看團隊燈號與帶隊提醒</span>
+      </button>
+    </div>
     <div class="logo">SPORT MIND ｜ 運動心理支持</div>
     <h1>選手解憂信箱 📮</h1>
-    <div class="sub">一個願意聽你說話的地方。把心裡的話交給我們，會有人懂你。</div>
+    <div class="sub">這裡是給選手安心說真話的地方。你可以寫下心裡的話，也可以回來看心理教練的回覆。</div>
   </header>
   <div class="wrap">
-    <div class="role-grid">
-      <div class="role-card" onclick="go('athlete')">
-        <span class="emoji">🏃</span><div class="t">選手端</div><div class="d">寫下今天的心情</div>
+    <div class="role-card athlete-entry">
+      <span class="emoji">🏃</span>
+      <div class="t">選手端</div>
+      <div class="d">寫下今天的心情，或查閱心理教練上次給你的回覆</div>
+      <div class="privacy-note">
+        <b>你寫的私密內容只給心理教練看。</b><br>
+        帶隊教練不會看到你的留言內容；只會看到不具名的團隊狀態與帶隊提醒。
       </div>
-      <div class="role-card" onclick="loginGate('psych')">
-        <span class="emoji">🧠</span><div class="t">心理教練後台</div><div class="d">查看與回覆</div>
+      <div class="athlete-actions">
+        <button class="btn" type="button" onclick="go('athlete')">寫下心裡的話</button>
+        <button class="btn ghost" type="button" onclick="go('inbox')">查看上次回覆</button>
       </div>
-      <div class="role-card" onclick="loginGate('coach')">
-        <span class="emoji">📋</span><div class="t">教練端</div><div class="d">帶隊提醒</div>
-      </div>
-    </div>
-    <div class="role-card" style="margin-top:14px;display:flex;align-items:center;gap:14px;text-align:left" onclick="go('inbox')">
-      <span class="emoji" style="margin:0;font-size:32px">📨</span>
-      <div><div class="t">查看心理教練的回覆</div><div class="d">輸入你的名字，看看有沒有人回你 💬</div></div>
     </div>
     <div class="footer-note">
       ⚠️ 本系統為心理支持與關懷工具，<b>並非醫療診斷工具</b>。<br>
@@ -272,9 +303,13 @@
   <header class="app">
     <button class="back" onclick="go('home')">‹ 返回首頁</button>
     <h1>今天的你，還好嗎？</h1>
-    <div class="sub">這裡很安全。你說的話，只有心理教練看得到。</div>
+    <div class="sub">你可以誠實說，不需要寫給教練看。私密文字只有心理教練能看見。</div>
   </header>
   <div class="wrap">
+    <div class="privacy-note">
+      <b>放心寫真話。</b>帶隊教練不會看到你的留言、困擾內容或心理教練回覆；只會看到不具名的團隊提醒，用來調整帶隊方式。
+      <button class="btn ghost sm" type="button" style="margin-top:10px" onclick="go('inbox')">查看上次回覆</button>
+    </div>
     <div class="card">
       <div class="section-label"><span class="dot"></span>基本資料</div>
       <div class="row">
@@ -480,12 +515,30 @@ const VIEWS=["home","athlete","inbox","thanks","psych","coach"];
 async function go(v){
   VIEWS.forEach(x=>$("view-"+x).classList.add("hide"));
   $("view-"+v).classList.remove("hide");
+  closeStaffMenu();
   window.scrollTo(0,0);
   if(v==="athlete")initAthleteForm();
   if(v==="psych"){renderPsych();await syncFromServer();renderPsych();}
   if(v==="coach"){renderCoach();await syncFromServer();renderCoach();}
   if(v==="inbox"){$("inbox-result").innerHTML="";$("i-name").value="";}
 }
+function toggleStaffMenu(){
+  $("staff-menu").classList.toggle("show");
+}
+function closeStaffMenu(){
+  const menu=$("staff-menu");
+  if(menu) menu.classList.remove("show");
+}
+function staffGo(role){
+  closeStaffMenu();
+  loginGate(role);
+}
+document.addEventListener("click",e=>{
+  const menu=$("staff-menu");
+  if(!menu) return;
+  if(e.target.closest(".staff-toggle")||e.target.closest(".staff-menu")) return;
+  menu.classList.remove("show");
+});
 function loginGate(role){
   // 簡易門檻：正式部署時請改成後端驗證；前端密碼只能降低誤入，不能當成真正資安。
   const pw = prompt(role==="psych"?"請輸入心理教練密碼：":"請輸入教練密碼：");
@@ -731,24 +784,39 @@ function saveReply(id){
 function renderCoach(){
   const data=load();
   if(!data.length){$("coach-list").innerHTML=`<div class="empty">目前沒有回報資料 📭</div>`;return;}
-  // 每位選手取最新一筆
+  // 每位選手取最新一筆，但教練端不顯示姓名與私密文字，避免選手因被辨識而不敢說真話。
   const latest={};
   data.forEach(r=>{if(!latest[r.name]||new Date(r.ts)>new Date(latest[r.name].ts))latest[r.name]=r;});
   let arr=Object.values(latest).map(r=>({r,light:computeLight(r)}));
-  const ord={red:0,yellow:1,green:2};
-  arr.sort((a,b)=>ord[a.light]-ord[b.light]);
-  $("coach-list").innerHTML=arr.map(({r,light})=>`
-    <div class="item ${light}">
+  const counts={red:0,yellow:0,green:0,risk:0};
+  arr.forEach(({r,light})=>{counts[light]++; if(r.risk) counts.risk++;});
+  const mainLight = counts.red ? "red" : counts.yellow ? "yellow" : "green";
+  const topAdvice = counts.red
+    ? "今天請降低公開壓力，不公開點名、不追問個人私事；訓練以穩定情緒與安全感為優先，必要時請心理教練個別接手。"
+    : counts.yellow
+    ? "今天適合多給明確肯定與小目標，避免用比較、責備或臨時加量刺激團隊壓力。"
+    : "團隊整體穩定，可以維持正向氣氛與正常訓練節奏。";
+  $("coach-list").innerHTML=`
+    <div class="card">
+      <h2>今日團隊狀態</h2>
+      <div class="hint">此頁不顯示人數、姓名、留言內容或心理教練回覆，只提供整體帶隊提醒。</div>
+      <div style="display:flex;justify-content:center;padding:8px 0">
+        <span class="light ${mainLight}"><span class="b"></span>${mainLight==="red"?"今日建議放慢":mainLight==="yellow"?"今日建議觀察":"今日狀態穩定"}</span>
+      </div>
+      ${counts.risk?`<div class="alert danger" style="margin-top:12px">有高風險訊號，請心理教練優先處理。教練端仍不顯示個人私密內容。</div>`:""}
+    </div>
+    <div class="item ${mainLight}" style="cursor:default">
       <div class="h">
-        <span class="nm">${esc(r.name)}</span>
-        <span class="light ${light}"><span class="b"></span>${light==="red"?"紅燈":light==="yellow"?"黃燈":"綠燈"}</span>
+        <span class="nm">今日帶隊提醒</span>
+        <span class="light ${mainLight}"><span class="b"></span>${mainLight==="red"?"放慢":mainLight==="yellow"?"觀察":"穩定"}</span>
       </div>
-      <div class="meta">${esc(r.team||"—")} ｜ ${r.date}</div>
-      <div class="mood-tag" style="margin-top:7px">📌 主要狀態：${mainState(r)}</div>
-      <div class="say-box good" style="margin-top:9px;margin-bottom:0">
-        <div class="t">今日帶隊建議</div>${coachAdvice(r,light)}
+      <div class="say-box good" style="margin-top:12px;margin-bottom:0">
+        <div class="t">建議做法</div>${topAdvice}
       </div>
-    </div>`).join("");
+      <div class="say-box avoid" style="margin-top:10px;margin-bottom:0">
+        <div class="t">避免做法</div>不要在全隊面前要求選手說明情緒、不用「你是不是有問題」這類問法，也不要用成績或同儕比較逼問。
+      </div>
+    </div>`;
 }
 
 /* ============ 工具：示範 / 匯出 / 清空 ============ */
