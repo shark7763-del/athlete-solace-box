@@ -17,9 +17,12 @@ const PROP_KEY = "SOLACE_SHEET_ID";
 
 const HEADERS = [
   "id","ts","date","name","team","mood",
-  "confidence","focus","motivation","anxiety","sleep","emotion","giveup",
+  "confidence","focus","motivation","anxiety","fatigue","sleep",
   "stress","q1","q2","q3","wantReply","risk","status","reply","replyTs"
 ];
+
+// 有新留言時，通知這個信箱（運動心理教練）
+const NOTIFY_EMAIL = "relax635@gmail.com";
 
 /* 取得（或自動建立）試算表，並記住其 ID */
 function getSpreadsheet_(){
@@ -93,7 +96,36 @@ function readAll_(){
 function createRec_(rec){
   const sh = getSheet_();
   sh.appendRow(objToRow_(rec));
+  notifyCoach_(rec);   // 寄信通知運動心理教練
   return rec;
+}
+
+/* 有新留言就寄 email 通知運動心理教練 */
+function notifyCoach_(rec){
+  try{
+    if(!NOTIFY_EMAIL) return;
+    rec = rec || {};
+    const high = rec.risk ? "（⚠ 高風險，請優先處理）" : "";
+    const subject = "【選手解憂信箱】新留言：" + (rec.name || "匿名選手") + high;
+    let body = "";
+    body += "有一位選手剛剛送出解憂信箱留言：\n\n";
+    body += "姓名：" + (rec.name || "") + "\n";
+    body += "隊伍：" + (rec.team || "") + "\n";
+    body += "日期：" + (rec.date || "") + "\n";
+    body += "希望回覆：" + (rec.wantReply ? "是" : "否") + "\n";
+    if(rec.risk){
+      body += "\n⚠ 系統偵測到可能的高風險語句，請務必優先且立即關心，必要時通知主要教練或轉介專業協助。\n";
+    }
+    body += "\n--- 留言內容 ---\n";
+    body += "最困擾的事：" + (rec.q1 || "（未填）") + "\n";
+    body += "希望被理解：" + (rec.q2 || "（未填）") + "\n";
+    body += "希望幫忙：" + (rec.q3 || "（未填）") + "\n";
+    body += "\n請登入運動心理教練後台查看與回覆。";
+    MailApp.sendEmail(NOTIFY_EMAIL, subject, body);
+  }catch(err){
+    // 通知失敗不影響資料寫入
+    Logger.log("notifyCoach_ 失敗：" + err);
+  }
 }
 
 function updateRec_(id, fields){
@@ -127,7 +159,7 @@ function objToRow_(o){
   return [
     o.id||"", o.ts||"", o.date||"", o.name||"", o.team||"", (o.mood===0?0:(o.mood||"")),
     num_(sc.confidence), num_(sc.focus), num_(sc.motivation), num_(sc.anxiety),
-    num_(sc.sleep), num_(sc.emotion), num_(sc.giveup),
+    num_(sc.fatigue), num_(sc.sleep),
     (o.stress||[]).join("、"), o.q1||"", o.q2||"", o.q3||"",
     o.wantReply?"是":"否", o.risk?"高風險":"", o.status||"todo", o.reply||"", o.replyTs||""
   ];
@@ -136,11 +168,11 @@ function rowToObj_(r){
   return {
     id:String(r[0]), ts:r[1], date:r[2], name:r[3], team:r[4], mood:Number(r[5]),
     scales:{ confidence:Number(r[6]), focus:Number(r[7]), motivation:Number(r[8]),
-             anxiety:Number(r[9]), sleep:Number(r[10]), emotion:Number(r[11]), giveup:Number(r[12]) },
-    stress: r[13] ? String(r[13]).split("、").filter(Boolean) : [],
-    q1:r[14], q2:r[15], q3:r[16],
-    wantReply: r[17]==="是", risk: r[18]==="高風險",
-    status: r[19]||"todo", reply:r[20]||"", replyTs:r[21]||""
+             anxiety:Number(r[9]), fatigue:Number(r[10]), sleep:Number(r[11]) },
+    stress: r[12] ? String(r[12]).split("、").filter(Boolean) : [],
+    q1:r[13], q2:r[14], q3:r[15],
+    wantReply: r[16]==="是", risk: r[17]==="高風險",
+    status: r[18]||"todo", reply:r[19]||"", replyTs:r[20]||""
   };
 }
 function num_(v){ return (v===0||v) ? Number(v) : 3; }
