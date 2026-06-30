@@ -1,12 +1,12 @@
-const CACHE_NAME = "heineken-logo-v1";
+const CACHE_NAME = "heineken-logo-v2";
 const CORE_ASSETS = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
   "./assets/icons/app-logo.png",
-  "./assets/icons/heineken-logo.png",
-  "./assets/icons/heineken-192.png",
-  "./assets/icons/heineken-512.png",
+  "./assets/icons/heineken-logo-v2.png",
+  "./assets/icons/heineken-192-v2.png",
+  "./assets/icons/heineken-512-v2.png",
   "./assets/icons/app-logo.svg",
   "./assets/icons/icon-192.png",
   "./assets/icons/icon-512.png"
@@ -26,6 +26,11 @@ self.addEventListener("activate", event => {
 
 self.addEventListener("fetch", event => {
   if(event.request.method !== "GET") return;
+  const url = new URL(event.request.url);
+  if(url.pathname.endsWith("/manifest.webmanifest") || url.pathname.includes("/assets/icons/")){
+    event.respondWith(fetch(event.request).catch(() => caches.match(event.request)));
+    return;
+  }
   if(event.request.mode === "navigate"){
     event.respondWith(
       fetch(event.request).then(response => {

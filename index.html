@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#1f3a5f">
 <meta name="description" content="你有故事，讓心裡的話有一個安全整理的地方。">
-<link rel="manifest" href="manifest.webmanifest?v=heineken-logo-v1">
+<link rel="manifest" href="manifest.webmanifest?v=heineken-logo-v2">
 <title>你有故事</title>
 <style>
   :root{
@@ -328,7 +328,7 @@
   </header>
   <div class="wrap">
     <div class="role-card athlete-entry">
-      <img class="app-logo-img" src="assets/icons/heineken-logo.png" alt="你有故事 app logo">
+      <img class="app-logo-img" src="assets/icons/heineken-logo-v2.png" alt="你有故事 app logo">
       <div class="t">進入故事箱</div>
       <div class="d">3 步驟心情卡，讓支持者更快知道你卡在哪裡</div>
       <div class="privacy-note">
@@ -1294,7 +1294,7 @@ if(CLOUD){
   const badge=$("mode-badge"); if(badge) badge.textContent="Demo mode｜僅本機快取";
 }
 if("serviceWorker" in navigator){
-  navigator.serviceWorker.register("./sw.js").then(reg=>reg.update()).catch(()=>{});
+  navigator.serviceWorker.register("./sw.js?v=heineken-logo-v2").then(reg=>reg.update()).catch(()=>{});
 }
 </script>
 </body>
