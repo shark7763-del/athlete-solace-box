@@ -1,7 +1,7 @@
 {
-  "name": "選手心情補給站",
-  "short_name": "心情補給站",
-  "description": "Athlete Solace Box 2.0 運動員心理支持與運動心理教練分流系統",
+  "name": "你有故事",
+  "short_name": "你有故事",
+  "description": "你有故事，讓心裡的話有一個安全整理的地方。",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

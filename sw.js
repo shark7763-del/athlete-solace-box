@@ -1,4 +1,4 @@
-const CACHE_NAME = "athlete-solace-box-2-0-v3";
+const CACHE_NAME = "you-have-a-story-v1";
 const CORE_ASSETS = [
   "./",
   "./index.html",
