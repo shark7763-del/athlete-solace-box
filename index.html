@@ -370,8 +370,8 @@
         <div><label class="field">隊伍</label><input type="text" id="a-team" placeholder="如：跆拳道隊"></div>
       </div>
       <div class="row" style="margin-top:12px">
-        <div><label class="field">選手代碼（可選）</label><input type="text" id="a-athlete-id" placeholder="如：A001，方便心理教練追蹤"></div>
-        <div><label class="field">隊伍代碼（可選）</label><input type="text" id="a-team-id" placeholder="如：TKD-U18"></div>
+        <div><label class="field">選手代碼（系統自動生成）</label><input type="text" id="a-athlete-id" placeholder="系統會自動產生" readonly></div>
+        <div><label class="field">隊伍代碼（系統自動生成）</label><input type="text" id="a-team-id" placeholder="系統會自動產生" readonly></div>
       </div>
       <div style="margin-top:12px"><label class="field">日期</label><input type="date" id="a-date"></div>
 
@@ -723,7 +723,7 @@ function loginGate(role){
 let curMood=null, curNeed=null, curStress=new Set(), curScales={};
 function initAthleteForm(){
   curMood=null; curNeed=null; curStress=new Set(); curScales={};
-  $("a-name").value="";$("a-team").value="";$("a-athlete-id").value="";$("a-team-id").value="";$("a-date").value=todayStr();
+  $("a-name").value="";$("a-team").value="";$("a-athlete-id").value=randCode("ATH-",6);$("a-team-id").value=randCode("TEAM-",5);$("a-date").value=todayStr();
   $("a-message").value="";$("a-reply").checked=true;
   // 心情
   $("mood-grid").innerHTML=MOODS.map((m,i)=>
@@ -744,6 +744,12 @@ function addStarter(s){
   const box=$("a-message");
   box.value = box.value.trim() ? box.value.trim()+"\n"+s : s;
   box.focus();
+}
+function randCode(prefix,len){
+  const chars="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let out=prefix;
+  for(let i=0;i<len;i++) out += chars[Math.floor(Math.random()*chars.length)];
+  return out;
 }
 function derivedScales(mood,stress){
   const m=MOODS[mood]||{w:2};
@@ -898,10 +904,11 @@ async function submitAthlete(){
   const risk = detectRisk(message) || curNeed==="adult_help";
   const scales=derivedScales(curMood, monsterTags);
   const team=$("a-team").value.trim();
-  const teamId=$("a-team-id").value.trim() || normalizeName(team) || "default-team";
+  const athleteId=$("a-athlete-id").value.trim() || randCode("ATH-",6);
+  const teamId=$("a-team-id").value.trim() || randCode("TEAM-",5);
   const rec={
     id:Date.now()+"-"+Math.random().toString(36).slice(2,6),
-    athleteId:$("a-athlete-id").value.trim() || "ath-"+normalizeName(name),
+    athleteId,
     teamId,
     name, team, date:$("a-date").value||todayStr(),
     ts:new Date().toISOString(), createdAt:new Date().toISOString(), updatedAt:new Date().toISOString(),
