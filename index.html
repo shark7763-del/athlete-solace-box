@@ -189,6 +189,8 @@
   .need{border:1.5px solid #e7ddcd;border-radius:14px;padding:11px 12px;cursor:pointer;background:#fff;color:var(--navy-2);font-weight:700;font-size:13.5px;transition:all .15s;}
   .need.sel{border-color:var(--navy);background:#eef4fb;color:var(--navy);box-shadow:0 0 0 3px rgba(31,58,95,.10);}
   .mode-badge{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:5px 11px;font-size:11.5px;font-weight:800;background:rgba(255,255,255,.18);color:#fff;margin-top:10px;}
+  .install-btn{width:auto;margin-top:12px;border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:9px 14px;background:rgba(255,255,255,.14);color:#fff;font-family:inherit;font-size:13px;font-weight:900;cursor:pointer;display:inline-flex;align-items:center;gap:7px;}
+  .install-btn.hide{display:none!important;}
   .step-card{background:#fff;border-radius:18px;padding:18px 16px;box-shadow:var(--shadow-sm);margin-bottom:14px;border:1px solid #efe6d8;}
   .step-head{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
   .step-no{width:34px;height:34px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:var(--navy);color:#fff;font-weight:900;}
@@ -321,6 +323,7 @@
     <h1>選手心情補給站 ⚡</h1>
     <div class="sub">把壓力怪獸丟進背包整理一下。這裡不是考試，也不是診斷，是給選手安心說真話的補給站。</div>
     <div id="mode-badge" class="mode-badge">正式使用模式｜雲端備份</div>
+    <button id="install-app-btn" class="install-btn hide" type="button" onclick="installApp()">⬇ 安裝 App</button>
   </header>
   <div class="wrap">
     <div class="role-card athlete-entry">
@@ -615,6 +618,32 @@ const $=(id)=>document.getElementById(id);
 // load()/save() 操作本機快取（同步），雲端同步另外處理
 function load(){try{return JSON.parse(localStorage.getItem(STORE_KEY))||[];}catch(e){return [];}}
 function save(d){localStorage.setItem(STORE_KEY,JSON.stringify(d));}
+
+/* ============ PWA 安裝 ============ */
+let deferredInstallPrompt=null;
+function showInstallButton(show){
+  const btn=$("install-app-btn");
+  if(btn) btn.classList.toggle("hide",!show);
+}
+window.addEventListener("beforeinstallprompt",e=>{
+  e.preventDefault();
+  deferredInstallPrompt=e;
+  showInstallButton(true);
+});
+window.addEventListener("appinstalled",()=>{
+  deferredInstallPrompt=null;
+  showInstallButton(false);
+});
+async function installApp(){
+  if(deferredInstallPrompt){
+    deferredInstallPrompt.prompt();
+    await deferredInstallPrompt.userChoice.catch(()=>null);
+    deferredInstallPrompt=null;
+    showInstallButton(false);
+    return;
+  }
+  alert("如果瀏覽器沒有跳出安裝視窗，請用瀏覽器選單的「加入主畫面」或「安裝應用程式」。");
+}
 
 /* ============ 雲端 API（GAS_URL 有填才啟用） ============ */
 const CLOUD = !!GAS_URL;
