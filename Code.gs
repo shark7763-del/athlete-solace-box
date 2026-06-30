@@ -18,7 +18,9 @@ const PROP_KEY = "SOLACE_SHEET_ID";
 const HEADERS = [
   "id","ts","date","name","team","mood",
   "confidence","focus","motivation","anxiety","fatigue","sleep",
-  "stress","q1","q2","q3","wantReply","risk","status","reply","replyTs"
+  "stress","needType","q1","q2","q3","wantReply","risk",
+  "issueTypes","urgency","summary","keyQuotes","intervention",
+  "status","reply","replyTs"
 ];
 
 // 有新留言時，通知這個信箱（運動心理教練）
@@ -54,6 +56,17 @@ function setup(){
   const def = ss.getSheetByName("工作表1") || ss.getSheetByName("Sheet1");
   if(def && ss.getSheets().length>1) ss.deleteSheet(def);
   const msg = "✅ 完成！資料試算表網址：\n" + ss.getUrl();
+  Logger.log(msg);
+  return msg;
+}
+
+/* 升級欄位：保留既有資料，只更新標題列與欄位格式 */
+function upgradeHeaders(){
+  const sh = getSheet_();
+  sh.getRange(1,1,1,HEADERS.length).setValues([HEADERS]).setFontWeight("bold");
+  sh.setFrozenRows(1);
+  sh.getRange(1,1,sh.getMaxRows(),HEADERS.length).setNumberFormat("@");
+  const msg = "✅ 已更新欄位標題，既有資料已保留。";
   Logger.log(msg);
   return msg;
 }
@@ -160,19 +173,46 @@ function objToRow_(o){
     o.id||"", o.ts||"", o.date||"", o.name||"", o.team||"", (o.mood===0?0:(o.mood||"")),
     num_(sc.confidence), num_(sc.focus), num_(sc.motivation), num_(sc.anxiety),
     num_(sc.fatigue), num_(sc.sleep),
-    (o.stress||[]).join("、"), o.q1||"", o.q2||"", o.q3||"",
-    o.wantReply?"是":"否", o.risk?"高風險":"", o.status||"todo", o.reply||"", o.replyTs||""
+    (o.stress||[]).join("、"), o.needType||"", o.q1||"", o.q2||"", o.q3||"",
+    o.wantReply?"是":"否", o.risk?"高風險":"",
+    ((o.analysis&&o.analysis.issueTypes)||o.issueTypes||[]).join("、"),
+    (o.analysis&&o.analysis.urgency)||o.urgency||"",
+    (o.analysis&&o.analysis.summary)||o.summary||"",
+    ((o.analysis&&o.analysis.keyQuotes)||o.keyQuotes||[]).join("｜"),
+    (o.analysis&&o.analysis.intervention)||o.intervention||"",
+    o.status||"todo", o.reply||"", o.replyTs||""
   ];
 }
 function rowToObj_(r){
+  const oldStatusAt18 = ["todo","done","follow","refer"].indexOf(String(r[18]||"")) !== -1;
+  if(r.length <= 21 || oldStatusAt18){
+    return {
+      id:String(r[0]), ts:r[1], date:r[2], name:r[3], team:r[4], mood:Number(r[5]),
+      scales:{ confidence:Number(r[6]), focus:Number(r[7]), motivation:Number(r[8]),
+               anxiety:Number(r[9]), fatigue:Number(r[10]), sleep:Number(r[11]) },
+      stress: r[12] ? String(r[12]).split("、").filter(Boolean) : [],
+      needType:"", q1:r[13], q2:r[14], q3:r[15],
+      wantReply: r[16]==="是", risk: r[17]==="高風險",
+      analysis:null,
+      status: r[18]||"todo", reply:r[19]||"", replyTs:r[20]||""
+    };
+  }
+  const analysis = {
+    issueTypes: r[19] ? String(r[19]).split("、").filter(Boolean) : [],
+    urgency: r[20] || "",
+    summary: r[21] || "",
+    keyQuotes: r[22] ? String(r[22]).split("｜").filter(Boolean) : [],
+    intervention: r[23] || ""
+  };
   return {
     id:String(r[0]), ts:r[1], date:r[2], name:r[3], team:r[4], mood:Number(r[5]),
     scales:{ confidence:Number(r[6]), focus:Number(r[7]), motivation:Number(r[8]),
              anxiety:Number(r[9]), fatigue:Number(r[10]), sleep:Number(r[11]) },
     stress: r[12] ? String(r[12]).split("、").filter(Boolean) : [],
-    q1:r[13], q2:r[14], q3:r[15],
-    wantReply: r[16]==="是", risk: r[17]==="高風險",
-    status: r[18]||"todo", reply:r[19]||"", replyTs:r[20]||""
+    needType:r[13]||"", q1:r[14], q2:r[15], q3:r[16],
+    wantReply: r[17]==="是", risk: r[18]==="高風險",
+    analysis: analysis.urgency ? analysis : null,
+    status: r[24]||"todo", reply:r[25]||"", replyTs:r[26]||""
   };
 }
 function num_(v){ return (v===0||v) ? Number(v) : 3; }
