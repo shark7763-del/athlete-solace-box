@@ -1,12 +1,12 @@
-const CACHE_NAME = "you-have-a-story-logo-v2";
+const CACHE_NAME = "heineken-logo-v1";
 const CORE_ASSETS = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
   "./assets/icons/app-logo.png",
-  "./assets/icons/you-have-story-logo.png",
-  "./assets/icons/you-have-story-192.png",
-  "./assets/icons/you-have-story-512.png",
+  "./assets/icons/heineken-logo.png",
+  "./assets/icons/heineken-192.png",
+  "./assets/icons/heineken-512.png",
   "./assets/icons/app-logo.svg",
   "./assets/icons/icon-192.png",
   "./assets/icons/icon-512.png"
