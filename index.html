@@ -3,7 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>選手解憂信箱｜運動心理支持系統</title>
+<meta name="theme-color" content="#1f3a5f">
+<meta name="description" content="選手心情補給站｜Athlete Solace Box 2.0，運動員趣味化心理支持與運動心理教練分流系統。">
+<link rel="manifest" href="manifest.webmanifest">
+<title>選手心情補給站｜Athlete Solace Box 2.0</title>
 <style>
   :root{
     --navy:#1f3a5f;        /* 深藍 */
@@ -185,6 +188,32 @@
   .need-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;}
   .need{border:1.5px solid #e7ddcd;border-radius:14px;padding:11px 12px;cursor:pointer;background:#fff;color:var(--navy-2);font-weight:700;font-size:13.5px;transition:all .15s;}
   .need.sel{border-color:var(--navy);background:#eef4fb;color:var(--navy);box-shadow:0 0 0 3px rgba(31,58,95,.10);}
+  .mode-badge{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:5px 11px;font-size:11.5px;font-weight:800;background:rgba(255,255,255,.18);color:#fff;margin-top:10px;}
+  .step-card{background:#fff;border-radius:18px;padding:18px 16px;box-shadow:var(--shadow-sm);margin-bottom:14px;border:1px solid #efe6d8;}
+  .step-head{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+  .step-no{width:34px;height:34px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:var(--navy);color:#fff;font-weight:900;}
+  .step-title{font-weight:900;color:var(--navy);font-size:17px;}
+  .step-sub{font-size:12.5px;color:var(--muted);margin-top:1px;}
+  .pick-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+  .pick-card{min-height:86px;border:1.5px solid #e7ddcd;border-radius:16px;background:#fff;cursor:pointer;padding:12px;text-align:left;transition:transform .12s,border-color .12s,box-shadow .12s,background .12s;}
+  .pick-card:active{transform:scale(.98);}
+  .pick-card.sel{border-color:var(--orange);background:#fff7ef;box-shadow:0 0 0 3px rgba(239,131,84,.14);}
+  .pick-card .ico{font-size:26px;display:block;margin-bottom:4px;}
+  .pick-card .name{font-weight:900;color:var(--navy);font-size:14px;line-height:1.35;}
+  .pick-card .desc{font-size:11.5px;color:var(--muted);margin-top:3px;line-height:1.4;}
+  .monster-grid .pick-card.sel{border-color:#6aa6a1;background:#eef9f7;box-shadow:0 0 0 3px rgba(106,166,161,.14);}
+  .need-grid .pick-card.sel{border-color:var(--navy);background:#eef4fb;box-shadow:0 0 0 3px rgba(31,58,95,.10);}
+  .starter-grid{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;}
+  .starter{border:1px solid #dfe8ef;background:#f7fbff;color:var(--navy-2);border-radius:999px;padding:7px 10px;font-size:12.5px;font-weight:700;cursor:pointer;}
+  .visibility-preview{display:grid;grid-template-columns:1fr;gap:10px;margin-top:14px;}
+  .visibility-box{border-radius:15px;padding:13px 14px;font-size:13.5px;line-height:1.65;border-left:5px solid var(--green);background:#eef7f1;color:#214b35;}
+  .visibility-box.coach{border-left-color:var(--yellow);background:#fff8e8;color:#684c12;}
+  .visibility-box.no{border-left-color:var(--red);background:#fff0ef;color:#82322c;}
+  .energy-line{height:12px;border-radius:999px;background:#e8dccb;overflow:hidden;margin-top:9px;}
+  .energy-line>div{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--green),var(--yellow),var(--red));}
+  .status-tabs{display:flex;gap:8px;overflow:auto;padding-bottom:4px;margin-bottom:14px;}
+  .status-tabs .pf{white-space:nowrap;}
+  .backup-note{font-size:12px;color:var(--muted);line-height:1.6;margin-top:8px;}
 
   /* ---------- 詳細 modal ---------- */
   .modal-bg{position:fixed;inset:0;background:rgba(31,58,95,.45);backdrop-filter:blur(3px);z-index:50;
@@ -264,6 +293,7 @@
     .row{flex-direction:column;gap:10px;}
     .mood-grid{grid-template-columns:repeat(2,1fr);}
     .need-grid{grid-template-columns:1fr;}
+    .pick-grid{grid-template-columns:1fr;}
     .triage-grid{grid-template-columns:1fr;}
     .mini-scales{grid-template-columns:1fr;}
     .btn-row .btn.sm{flex:1 1 calc(50% - 10px);}
@@ -287,21 +317,22 @@
         <span class="d">只看團隊燈號與帶隊提醒</span>
       </button>
     </div>
-    <div class="logo">SPORT MIND ｜ 運動心理支持</div>
-    <h1>選手解憂信箱 📮</h1>
-    <div class="sub">這裡是給選手安心說真話的地方。你可以寫下心裡的話，也可以回來看運動心理教練的回覆。</div>
+    <div class="logo">ATHLETE SOLACE BOX 2.0</div>
+    <h1>選手心情補給站 ⚡</h1>
+    <div class="sub">把壓力怪獸丟進背包整理一下。這裡不是考試，也不是診斷，是給選手安心說真話的補給站。</div>
+    <div id="mode-badge" class="mode-badge">正式使用模式｜雲端備份</div>
   </header>
   <div class="wrap">
     <div class="role-card athlete-entry">
-      <span class="emoji">🏃</span>
-      <div class="t">選手端</div>
-      <div class="d">寫下今天的心情，或查閱運動心理教練上次給你的回覆</div>
+      <span class="emoji">🎒</span>
+      <div class="t">進入補給站</div>
+      <div class="d">3 步驟心情卡，讓運動心理教練更快知道你卡在哪裡</div>
       <div class="privacy-note">
         <b>你寫的私密內容只給運動心理教練看。</b><br>
         帶隊教練不會看到你的留言內容；只會看到不具名的團隊狀態與帶隊提醒。
       </div>
       <div class="athlete-actions">
-        <button class="btn" type="button" onclick="go('athlete')">寫下心裡的話</button>
+        <button class="btn" type="button" onclick="go('athlete')">開始補給</button>
         <button class="btn ghost" type="button" onclick="go('inbox')">查看上次回覆</button>
       </div>
     </div>
@@ -320,8 +351,8 @@
 <div id="view-athlete" class="hide">
   <header class="app">
     <button class="back" onclick="go('home')">‹ 返回首頁</button>
-    <h1>今天的你，還好嗎？</h1>
-    <div class="sub">你可以誠實說，不需要寫給教練看。私密文字只有運動心理教練能看見。</div>
+    <h1>選手心情補給站</h1>
+    <div class="sub">三步驟把今天的壓力背包打開。你不用寫得完美，只要讓我們知道你現在在哪裡。</div>
   </header>
   <div class="wrap">
     <div class="privacy-note">
@@ -334,34 +365,54 @@
         <div><label class="field">姓名</label><input type="text" id="a-name" placeholder="你的名字"></div>
         <div><label class="field">隊伍</label><input type="text" id="a-team" placeholder="如：跆拳道隊"></div>
       </div>
+      <div class="row" style="margin-top:12px">
+        <div><label class="field">選手代碼（可選）</label><input type="text" id="a-athlete-id" placeholder="如：A001，方便心理教練追蹤"></div>
+        <div><label class="field">隊伍代碼（可選）</label><input type="text" id="a-team-id" placeholder="如：TKD-U18"></div>
+      </div>
       <div style="margin-top:12px"><label class="field">日期</label><input type="date" id="a-date"></div>
 
-      <div class="section-label"><span class="dot"></span>今天的心情</div>
-      <div class="mood-grid" id="mood-grid"></div>
+      <div class="step-card">
+        <div class="step-head">
+          <span class="step-no">1</span>
+          <div><div class="step-title">今天的心情卡</div><div class="step-sub">選一張最像現在的你</div></div>
+        </div>
+        <div class="pick-grid" id="mood-grid"></div>
+      </div>
 
-      <div class="section-label"><span class="dot"></span>運動心理自我檢測（1～5 分）</div>
-      <div id="scales"></div>
+      <div class="step-card">
+        <div class="step-head">
+          <span class="step-no">2</span>
+          <div><div class="step-title">壓力怪獸</div><div class="step-sub">可以多選，怪獸越清楚，心理教練越快知道怎麼接住你</div></div>
+        </div>
+        <div class="pick-grid monster-grid" id="stress-chips"></div>
+      </div>
 
-      <div class="section-label"><span class="dot"></span>壓力來源（可多選）</div>
-      <div class="chips" id="stress-chips"></div>
-
-      <div class="section-label"><span class="dot"></span>我現在需要什麼</div>
-      <div class="need-grid" id="need-grid"></div>
+      <div class="step-card">
+        <div class="step-head">
+          <span class="step-no">3</span>
+          <div><div class="step-title">我現在需要什麼</div><div class="step-sub">這會影響心理教練後台的處理優先順序</div></div>
+        </div>
+        <div class="pick-grid need-grid" id="need-grid"></div>
+      </div>
 
       <div class="section-label"><span class="dot"></span>解憂信箱 💌</div>
-      <label class="field">今天最想丟進信箱的是什麼？</label>
-      <textarea id="a-q1" placeholder="不用寫得很完整，想到什麼就寫什麼。這裡可以說真話。"></textarea>
-      <label class="field" style="margin-top:12px">如果願意，可以多說一點：你最希望有人懂你哪一點？</label>
-      <textarea id="a-q2" placeholder="也許是一種感覺，一句話…"></textarea>
-      <label class="field" style="margin-top:12px">你希望運動心理教練怎麼幫你？</label>
-      <textarea id="a-q3" placeholder="陪我聊聊、給我建議、幫我跟教練說…都可以"></textarea>
+      <label class="field">用一句提示開始也可以</label>
+      <div class="starter-grid" id="starter-grid"></div>
+      <textarea id="a-message" placeholder="我今天最卡的是……"></textarea>
 
       <div class="check-row" style="margin-top:16px" onclick="toggleReply(event)">
         <input type="checkbox" id="a-reply" checked>
         <span>希望運動心理教練回覆我 💬</span>
       </div>
 
-      <button class="btn" style="margin-top:18px" onclick="submitAthlete()">輕輕送出 →</button>
+      <div class="section-label"><span class="dot"></span>送出前，可見範圍預覽</div>
+      <div class="visibility-preview">
+        <div class="visibility-box"><b>運動心理教練會看到：</b>完整心情卡、壓力怪獸、文字內容、你的姓名與回覆需求。</div>
+        <div class="visibility-box coach"><b>帶隊教練只會看到：</b>不具名團隊燈號、壓力趨勢、帶隊建議與需要心理教練追蹤的人數。</div>
+        <div class="visibility-box no"><b>帶隊教練不會看到：</b>你的姓名、原文內容、運動心理教練回覆。</div>
+      </div>
+
+      <button class="btn" style="margin-top:18px" onclick="submitAthlete()">送進補給站 →</button>
     </div>
   </div>
 </div>
@@ -416,27 +467,31 @@
       <div><div style="font-size:24px;font-weight:800;color:var(--navy)" id="cnt-risk">0</div><div class="muted" style="font-size:12px">高風險</div></div>
     </div>
     <div class="triage-grid">
-      <div class="triage-card immediate"><div class="num" id="cnt-immediate">0</div><div class="t">立即關心</div><div class="d">高風險、自傷語句、紅燈</div></div>
+      <div class="triage-card immediate"><div class="num" id="cnt-immediate">0</div><div class="t">立即支持</div><div class="d">安全疑慮、失控衝動、重大壓力</div></div>
       <div class="triage-card today"><div class="num" id="cnt-today">0</div><div class="t">今日優先</div><div class="d">想回覆、焦慮高、需要協助</div></div>
       <div class="triage-card followup"><div class="num" id="cnt-followup">0</div><div class="t">持續追蹤</div><div class="d">連續低能量或已標追蹤</div></div>
       <div class="triage-card observe"><div class="num" id="cnt-observe">0</div><div class="t">一般觀察</div><div class="d">單次低落、無明顯危機</div></div>
     </div>
     <div class="pill-filter" id="psych-filter">
       <div class="pf sel" data-f="all">全部</div>
-      <div class="pf" data-f="immediate">立即關心</div>
+      <div class="pf" data-f="immediate">立即支持</div>
       <div class="pf" data-f="today">今日優先</div>
       <div class="pf" data-f="followup">持續追蹤</div>
       <div class="pf" data-f="observe">一般觀察</div>
-      <div class="pf" data-f="todo">未處理</div>
+      <div class="pf" data-f="replied">已回覆</div>
+      <div class="pf" data-f="follow">待追蹤</div>
+      <div class="pf" data-f="closed">已結案</div>
     </div>
     <div id="psych-list"></div>
     <div class="btn-row" style="margin-top:10px">
       <button class="btn ghost sm" onclick="seedDemo()">載入示範資料</button>
-      <button class="btn ghost sm" onclick="exportData()">匯出 JSON</button>
+      <button class="btn ghost sm" onclick="exportData()">資料備份 JSON</button>
+      <button class="btn ghost sm" onclick="exportCoachSafe()">去識別化匯出</button>
       <button class="btn ghost sm" onclick="document.getElementById('import-json').click()">匯入 JSON</button>
       <button class="btn ghost sm" onclick="clearLocal()">清空本機</button>
       <button class="btn ghost sm" onclick="clearCloudAll()">清空雲端</button>
     </div>
+    <div class="backup-note">正式使用模式會寫入雲端 Apps Script / Sheets；localStorage 僅作為本機快取與離線備援。請定期使用「資料備份 JSON」。</div>
     <input id="import-json" class="sr-only" type="file" accept="application/json" onchange="importData(event)">
   </div>
 </div>
@@ -469,8 +524,13 @@ const STORE_KEY = "solace_box_records_v1";
 const PSYCH_PASSWORD = "mind123";
 const COACH_PASSWORD = "coach123";
 const MOODS = [
-  {k:"充滿鬥志",e:"💪",w:0},{k:"狀態良好",e:"😊",w:0},{k:"平穩專注",e:"😌",w:1},
-  {k:"有些壓力",e:"😅",w:2},{k:"感到疲勞",e:"😫",w:3},{k:"心情低落",e:"😔",w:4},
+  {k:"火山快爆了",e:"🌋",w:4,desc:"很滿、很煩、快壓不住"},
+  {k:"電池快沒電",e:"🪫",w:3,desc:"疲勞、沒能量、想休息"},
+  {k:"腦袋很吵",e:"🌀",w:3,desc:"一直想很多，停不下來"},
+  {k:"想躲起來",e:"🫥",w:4,desc:"不想被問，也不想被看見"},
+  {k:"今天還可以",e:"🙂",w:1,desc:"沒有很好，但還撐得住"},
+  {k:"我很想贏但很累",e:"🏁",w:3,desc:"有目標，但身心負荷很重"},
+  {k:"我不知道怎麼講",e:"❔",w:2,desc:"說不清楚，但就是怪怪的"}
 ];
 // 量表：positive=越高越好；negative=越高越糟
 const SCALES = [
@@ -481,19 +541,31 @@ const SCALES = [
   {k:"fatigue",n:"心理疲勞程度",lo:"精神飽滿",hi:"非常疲憊",dir:"neg",desc:"精神上的疲憊感，而非身體疲勞。"},
   {k:"sleep",n:"睡眠品質",lo:"睡很差",hi:"睡很好",dir:"pos",desc:"昨晚睡眠是否有助於恢復精神與體力。"},
 ];
-const STRESSORS = ["比賽","訓練","教練","隊友","家人期待","課業","體重控制","運動傷害","睡眠","復健","升學","經濟壓力"];
-const NEED_TYPES = [
-  {k:"listen",n:"只想被聽見"},
-  {k:"advice",n:"想要建議"},
-  {k:"talk",n:"想找心理師聊"},
-  {k:"coach",n:"希望協助跟教練溝通"},
-  {k:"family",n:"希望協助跟家人溝通"},
-  {k:"danger",n:"我現在很危險"}
+const STRESSORS = [
+  {k:"比賽怪獸",base:"比賽",e:"🏆",desc:"怕輸、怕失常、怕辜負期待"},
+  {k:"教練怪獸",base:"教練",e:"📣",desc:"責備、溝通壓力、怕被知道"},
+  {k:"課業怪獸",base:"課業",e:"📚",desc:"功課、考試、升學壓力"},
+  {k:"家庭怪獸",base:"家人期待",e:"🏠",desc:"家人期待、回家也不能放鬆"},
+  {k:"隊友怪獸",base:"隊友",e:"🤝",desc:"比較、衝突、團隊氣氛"},
+  {k:"受傷怪獸",base:"運動傷害",e:"🩹",desc:"疼痛、復健、怕回不去"},
+  {k:"體重怪獸",base:"體重控制",e:"⚖️",desc:"量級、飲食、身體壓力"},
+  {k:"睡眠怪獸",base:"睡眠",e:"🌙",desc:"睡不好、恢復不夠"},
+  {k:"自信怪獸",base:"自信",e:"🧱",desc:"懷疑自己、不敢相信自己"},
+  {k:"不知道，就是不舒服",base:"不舒服",e:"☁️",desc:"說不出原因，但需要被聽見"}
 ];
-const RISK_WORDS = ["不想活","想傷害自己","傷害自己","想消失","撐不下去","活著沒意義","活著沒有意義",
-  "想死","自殺","輕生","結束生命","不想再撐","沒有意義","解脫","消失算了"];
+const NEED_TYPES = [
+  {k:"listen",n:"不用回我，我只是想說",e:"🫙"},
+  {k:"encourage",n:"給我一句鼓勵",e:"✨"},
+  {k:"organize",n:"幫我整理問題",e:"🧩"},
+  {k:"talk",n:"我想跟心理教練聊",e:"💬"},
+  {k:"coach_adjust",n:"我希望教練調整帶隊方式，但不要說是我",e:"🛡️"},
+  {k:"adult_help",n:"我現在真的需要大人幫忙",e:"🚨"}
+];
+const SENTENCE_STARTERS = ["我今天最卡的是……","我其實很想說……","我最怕教練知道的是……","我希望有人懂我……","我不是不努力，我只是……","我需要的不是罵，是……","如果可以，我希望明天訓練……"];
+const RISK_WORDS = ["自殺","想死","不想活","傷害自己","割腕","跳樓","失控","想打人","被傷害","性騷","霸凌",
+  "想消失","撐不下去","活著沒意義","活著沒有意義","輕生","結束生命","不想再撐","解脫","消失算了"];
 const ISSUE_RULES = [
-  {type:"高風險危機",stress:[],words:["不想活","想傷害","傷害自己","想消失","撐不下去","想死","自殺","輕生","結束生命","不想再撐","活著沒意義","活著沒有意義"]},
+  {type:"立即安全支持",stress:[],words:["自殺","想死","不想活","傷害自己","割腕","跳樓","失控","想打人","被傷害","性騷","霸凌","想消失","撐不下去","輕生","結束生命"]},
   {type:"教練關係",stress:["教練"],words:["教練","被罵","責備","罵我","不敢跟教練","教練失望"]},
   {type:"比賽壓力",stress:["比賽"],words:["比賽","賽前","輸","表現不好","失常","排名","成績"]},
   {type:"訓練壓力",stress:["訓練"],words:["訓練","練不好","練太多","加量","操練","訓練量"]},
@@ -503,23 +575,39 @@ const ISSUE_RULES = [
   {type:"睡眠疲勞",stress:["睡眠"],words:["睡不著","失眠","睡很差","很累","疲憊","疲勞"]},
   {type:"體重控制",stress:["體重控制"],words:["減重","體重","量級","吃不下","不敢吃","變胖"]},
   {type:"失去動機",stress:[],words:["不想練","沒動力","放棄","不想去了","沒意義","提不起勁"]},
-  {type:"自我懷疑",stress:[],words:["我不行","不夠好","沒用","爛","拖累","懷疑自己"]}
+  {type:"自我懷疑",stress:["自信"],words:["我不行","不夠好","沒用","爛","拖累","懷疑自己"]}
 ];
 const URGENCY_LABELS = {
-  immediate:"立即關心",
+  immediate:"立即支持",
   today:"今日優先",
   followup:"持續追蹤",
   observe:"一般觀察"
 };
 const STATUSES = [
-  {k:"todo",n:"未處理"},{k:"done",n:"已回覆"},{k:"follow",n:"持續追蹤"},{k:"refer",n:"需轉介"}
+  {k:"new",n:"新進"},
+  {k:"read",n:"已讀"},
+  {k:"replied",n:"已回覆"},
+  {k:"follow",n:"需要追蹤"},
+  {k:"refer",n:"建議轉介"},
+  {k:"closed",n:"已結案"}
 ];
 const AI_TEMPLATES = {
-  "鼓勵型":(r)=>`${r.name}，謝謝你願意把今天的狀態寫下來，這本身就需要很大的勇氣。我看到你在${r.team||"訓練"}上其實很努力，先別急著否定自己。今天你已經做得夠好了，我們一起把目標拆小一點，一步一步來。記得，我會在這裡陪你。💪`,
-  "賽前焦慮型":(r)=>`${r.name}，賽前會緊張是因為你很在乎，這代表你重視這場比賽，不是你不行。把注意力從「結果」拉回到「我能控制的動作」，做幾次深呼吸（吸4秒、停4秒、吐6秒）。你已經練習了這麼多次，相信身體的記憶。我會陪你一起準備好。🌟`,
-  "受傷低潮型":(r)=>`${r.name}，受傷的這段時間真的很不好受，會難過、會擔心都是正常的。身體需要時間復原，這不是你的退步，而是另一種訓練。我們可以一起設定復健的小目標，讓你感覺到自己仍在前進。需要聊聊的時候，隨時找我。🤍`,
-  "動機低落型":(r)=>`${r.name}，最近覺得提不起勁，是身體和心在提醒你該休息一下了。不想練的時候不代表你不愛這項運動，先允許自己慢下來。我們找一個你最喜歡的小動作開始，重新感受運動帶來的快樂。你不需要一次找回全部的動力。🌱`,
-  "親子溝通型":(r)=>`${r.name}，家人的期待有時候會變成壓力，我懂那種「想讓他們開心、又怕自己做不到」的感覺。你的心情是值得被理解的。我可以協助你跟家人或教練溝通，讓他們知道你需要的支持方式。你不孤單，我們一起面對。🏡`,
+  "四段式支持":(r)=>`1. 我聽到你說的是：${analysisOf(r).summary}
+2. 這不是你不努力，而是你現在的壓力背包太滿，需要先被整理。
+3. 今天先做一件小事：找一個可以信任的人說一句「我今天需要被聽一下」，或先把明天訓練目標縮小成一件可完成的事。
+4. 下次我們追蹤：我會再看你的狀態，必要時可以安排短談。`,
+  "鼓勵補給":(r)=>`1. 我聽到你說的是：今天真的不輕鬆，但你還是把狀態寫出來了。
+2. 這不是你不努力，而是努力太久的人也會需要補給。
+3. 今天先做一件小事：睡前給自己一句「我今天有撐住」，不要急著檢討全部。
+4. 下次我們追蹤：如果明天還是很重，請再寫一次或找我聊。`,
+  "比賽壓力":(r)=>`1. 我聽到你說的是：你很在乎比賽，也擔心自己表現不夠好。
+2. 這不是你不努力，而是重要比賽前身體和腦袋都在提高警覺。
+3. 今天先做一件小事：把目標改成一個可控制動作，而不是只盯著結果。
+4. 下次我們追蹤：賽前我會再確認你的焦慮和睡眠狀態。`,
+  "教練壓力":(r)=>`1. 我聽到你說的是：你需要被理解，也擔心教練知道後會有壓力。
+2. 這不是你不努力，而是被提醒和被責備的感受很不一樣。
+3. 今天先做一件小事：先把你希望教練調整的一句話寫清楚，我會協助轉成不具名建議。
+4. 下次我們追蹤：我會注意帶隊建議，不直接暴露你的原文。`,
 };
 
 /* ============ 工具 ============ */
@@ -605,35 +693,47 @@ function loginGate(role){
 let curMood=null, curNeed=null, curStress=new Set(), curScales={};
 function initAthleteForm(){
   curMood=null; curNeed=null; curStress=new Set(); curScales={};
-  $("a-name").value="";$("a-team").value="";$("a-date").value=todayStr();
-  $("a-q1").value="";$("a-q2").value="";$("a-q3").value="";$("a-reply").checked=true;
+  $("a-name").value="";$("a-team").value="";$("a-athlete-id").value="";$("a-team-id").value="";$("a-date").value=todayStr();
+  $("a-message").value="";$("a-reply").checked=true;
   // 心情
   $("mood-grid").innerHTML=MOODS.map((m,i)=>
-    `<div class="mood" data-i="${i}" onclick="pickMood(${i})"><span class="e">${m.e}</span>${m.k}</div>`).join("");
-  // 量表
-  $("scales").innerHTML=SCALES.map(s=>{
-    curScales[s.k]=3;
-    return `<div class="scale">
-      <div class="top"><span class="name">${s.n}</span><span class="val" id="val-${s.k}">3</span></div>
-      ${s.desc?`<div style="font-size:11.5px;color:var(--muted);margin:-2px 0 6px;line-height:1.4">${s.desc}</div>`:""}
-      <input type="range" min="1" max="5" value="3" oninput="setScale('${s.k}',this.value)">
-      <div class="ends"><span>${s.lo}</span><span>${s.hi}</span></div>
-    </div>`;
-  }).join("");
+    `<button class="pick-card" type="button" data-i="${i}" onclick="pickMood(${i})"><span class="ico">${m.e}</span><span class="name">${m.k}</span><span class="desc">${m.desc}</span></button>`).join("");
   // 壓力源
   $("stress-chips").innerHTML=STRESSORS.map(s=>
-    `<div class="chip" onclick="toggleStress(this,'${s}')">${s}</div>`).join("");
+    `<button class="pick-card" type="button" onclick="toggleStress(this,'${s.base}')"><span class="ico">${s.e}</span><span class="name">${s.k}</span><span class="desc">${s.desc}</span></button>`).join("");
   $("need-grid").innerHTML=NEED_TYPES.map(n=>
-    `<div class="need" data-k="${n.k}" onclick="pickNeed('${n.k}')">${n.n}</div>`).join("");
+    `<button class="pick-card" type="button" data-k="${n.k}" onclick="pickNeed('${n.k}')"><span class="ico">${n.e}</span><span class="name">${n.n}</span></button>`).join("");
+  $("starter-grid").innerHTML=SENTENCE_STARTERS.map(s=>`<button class="starter" type="button" onclick="addStarter('${s}')">${s}</button>`).join("");
 }
-function pickMood(i){curMood=i;document.querySelectorAll("#mood-grid .mood").forEach(el=>el.classList.toggle("sel",+el.dataset.i===i));}
-function pickNeed(k){curNeed=k;document.querySelectorAll("#need-grid .need").forEach(el=>el.classList.toggle("sel",el.dataset.k===k));}
+function pickMood(i){curMood=i;document.querySelectorAll("#mood-grid .pick-card").forEach(el=>el.classList.toggle("sel",+el.dataset.i===i));}
+function pickNeed(k){curNeed=k;document.querySelectorAll("#need-grid .pick-card").forEach(el=>el.classList.toggle("sel",el.dataset.k===k));}
 function setScale(k,v){curScales[k]=+v;$("val-"+k).textContent=v;}
 function toggleStress(el,s){if(curStress.has(s)){curStress.delete(s);el.classList.remove("sel");}else{curStress.add(s);el.classList.add("sel");}}
 function toggleReply(e){if(e.target.tagName!=="INPUT"){$("a-reply").checked=!$("a-reply").checked;}}
+function addStarter(s){
+  const box=$("a-message");
+  box.value = box.value.trim() ? box.value.trim()+"\n"+s : s;
+  box.focus();
+}
+function derivedScales(mood,stress){
+  const m=MOODS[mood]||{w:2};
+  const set=new Set(stress||[]);
+  const sc={confidence:3,focus:3,motivation:3,anxiety:3,fatigue:3,sleep:3};
+  if(m.w>=4){ sc.anxiety=5; sc.fatigue=4; sc.motivation=2; }
+  if(m.k==="電池快沒電"){ sc.fatigue=5; sc.sleep=2; }
+  if(m.k==="腦袋很吵"){ sc.anxiety=5; sc.focus=2; }
+  if(m.k==="想躲起來"){ sc.confidence=2; sc.motivation=2; }
+  if(m.k==="我很想贏但很累"){ sc.motivation=4; sc.fatigue=4; sc.anxiety=4; }
+  if(set.has("睡眠")) sc.sleep=2;
+  if(set.has("自信")) sc.confidence=2;
+  if(set.has("比賽")) sc.anxiety=Math.max(sc.anxiety,4);
+  if(set.has("運動傷害")) sc.motivation=Math.min(sc.motivation,2);
+  return sc;
+}
 
 /* ============ 燈號 / 風險 計算 ============ */
 function computeLight(r){
+  r.scales = r.scales || derivedScales(r.mood, r.stress || r.monsterTags || []);
   // 分數化：正向直接用，負向反轉（6-x），越高越好
   let pos=["confidence","focus","motivation","sleep"];
   let total=0,n=0;
@@ -657,7 +757,7 @@ function detectRisk(txt){
   return RISK_WORDS.some(w=>t.includes(w));
 }
 function recordText(r){
-  return [r.q1,r.q2,r.q3].filter(Boolean).join(" ").trim();
+  return [r.message,r.q1,r.q2,r.q3].filter(Boolean).join(" ").trim();
 }
 function needLabel(k){
   const n=NEED_TYPES.find(x=>x.k===k);
@@ -689,10 +789,10 @@ function urgencyFor(r,light,issues){
   const recentSame=load().filter(x=>x.id!==r.id && bySameName(r.name)(x))
     .sort((a,b)=>new Date(b.ts)-new Date(a.ts)).slice(0,2);
   const badStreak=recentSame.length>=2 && recentSame.every(x=>computeLight(x)==="red" || computeLight(x)==="yellow");
-  if(r.risk || r.needType==="danger" || issues.includes("高風險危機")) return "immediate";
+  if(r.risk || r.needType==="adult_help" || issues.includes("立即安全支持")) return "immediate";
   if(light==="red" || r.scales.anxiety>=5 || r.scales.fatigue>=5 || r.scales.motivation<=1) return "immediate";
   if(badStreak || r.status==="follow") return "followup";
-  if(r.wantReply || ["talk","coach","family","advice"].includes(r.needType) || light==="yellow") return "today";
+  if(r.wantReply || ["talk","coach_adjust","organize","encourage"].includes(r.needType) || light==="yellow") return "today";
   return "observe";
 }
 function summaryFor(r,issues,light){
@@ -705,15 +805,16 @@ function summaryFor(r,issues,light){
   if(r.scales.sleep<=2) signals.push("睡眠不佳");
   if(r.scales.confidence<=2) signals.push("自信偏低");
   const signalText=signals.length ? "，並出現" + signals.slice(0,3).join("、") : "";
-  return `選手目前主要卡在「${main}」，心情為「${mood}」${signalText}。`;
+  return `選手目前主要卡在「${main}」，心情卡是「${mood}」${signalText}。`;
 }
 function interventionFor(r,urgency,issues){
-  if(urgency==="immediate") return "先確認目前是否安全，必要時立即聯繫可信任成人、心理師或轉介資源。";
+  if(urgency==="immediate") return "先做安全確認，提醒不要只等待系統回覆；必要時立即聯繫可信任成人、110 / 119 / 1925 / 1995。";
   if(issues.includes("教練關係")) return "先接住情緒，再釐清具體事件；必要時協助轉譯給教練，避免直接暴露私密內容。";
   if(issues.includes("比賽壓力")) return "協助把焦點拉回可控制流程，安排賽前呼吸與短句自我暗示。";
   if(issues.includes("睡眠疲勞")) return "先評估睡眠與恢復，建議短回覆關心並觀察是否需要調整訓練負荷。";
   if(issues.includes("失去動機")) return "先降低自責，和選手找一個可完成的小目標，必要時安排短談。";
   if(r.needType==="listen") return "先以情緒支持回覆，讓選手知道內容已被看見，不急著給建議。";
+  if(r.needType==="coach_adjust") return "將內容轉成不具名帶隊建議，避免讓帶隊教練辨識出個人。";
   return "今日可簡短回覆，確認需求並視情況安排後續追蹤。";
 }
 function analyzeRecord(r){
@@ -734,9 +835,10 @@ function analysisOf(r){
 }
 function mainState(r){
   // 主要狀態描述（供教練/家長）
+  r.scales = r.scales || derivedScales(r.mood, r.stress || []);
   const moodW=MOODS[r.mood]?MOODS[r.mood].w:1;
-  if(r.risk) return "情緒明顯低落，需立即關心";
-  if(r.scales.fatigue>=4) return "心理疲勞偏高";
+  if(r.risk) return "需要立即支持";
+  if(r.scales.fatigue>=4) return "疲勞補給需求偏高";
   if(r.scales.motivation<=2) return "訓練動機偏低";
   if(r.scales.anxiety>=4) return "焦慮偏高";
   if(r.scales.confidence<=2) return "自信心不足";
@@ -761,19 +863,28 @@ async function submitAthlete(){
   if(!name){alert("請填寫姓名 🙂");return;}
   if(curMood===null){alert("選一個今天的心情吧 💛");return;}
   if(!curNeed){alert("選一下你現在需要什麼，心理師會更快知道怎麼幫你。");return;}
-  const q1=$("a-q1").value.trim(),q2=$("a-q2").value.trim(),q3=$("a-q3").value.trim();
-  const risk = detectRisk(q1+q2+q3) || curNeed==="danger";
+  const message=$("a-message").value.trim();
+  const monsterTags=[...curStress];
+  const risk = detectRisk(message) || curNeed==="adult_help";
+  const scales=derivedScales(curMood, monsterTags);
+  const team=$("a-team").value.trim();
+  const teamId=$("a-team-id").value.trim() || normalizeName(team) || "default-team";
   const rec={
     id:Date.now()+"-"+Math.random().toString(36).slice(2,6),
-    name, team:$("a-team").value.trim(), date:$("a-date").value||todayStr(),
-    ts:new Date().toISOString(),
-    mood:curMood, scales:{...curScales},
-    stress:[...curStress], needType:curNeed, q1,q2,q3,
+    athleteId:$("a-athlete-id").value.trim() || "ath-"+normalizeName(name),
+    teamId,
+    name, team, date:$("a-date").value||todayStr(),
+    ts:new Date().toISOString(), createdAt:new Date().toISOString(), updatedAt:new Date().toISOString(),
+    mood:curMood, moodCard:MOODS[curMood].k, scales,
+    stress:monsterTags, monsterTags, needType:curNeed, message, q1:message, q2:"", q3:"",
     wantReply:$("a-reply").checked,
-    risk,
-    status:"todo", reply:"", replyTs:""
+    wantsReply:$("a-reply").checked,
+    risk, riskLevel:risk?"immediate":"normal",
+    visibleToCoachSummary:"",
+    status:"new", psychologistReply:"", reply:"", replyTs:"", followUpDate:""
   };
   rec.analysis=analyzeRecord(rec);
+  rec.visibleToCoachSummary=rec.analysis.summary.replace(name,"選手");
   const data=load(); data.unshift(rec); save(data);
   showThanks(rec);
   if(CLOUD){
@@ -798,10 +909,9 @@ function showThanks(rec){
     ? "運動心理教練很快會看到你的訊息並回覆你。" + msgs[Math.floor(Math.random()*msgs.length)]
     : msgs[Math.floor(Math.random()*msgs.length)];
   if(rec.risk){
-    $("thanks-title").textContent="謝謝你告訴我們 🤍";
+    $("thanks-title").textContent="已標示為立即支持";
     $("thanks-risk").classList.remove("hide");
-    $("thanks-risk").innerHTML=`<b>你並不孤單。</b><br>你願意說出口非常勇敢。運動心理教練會立刻收到提醒。<br>
-      如果你現在感覺很危險，請立刻找信任的大人，或撥打 <b>安心專線 1925</b>、<b>生命線 1995</b>。<br>本系統不是醫療工具，但真的有人想陪你。`;
+    $("thanks-risk").innerHTML=`<b>緊急狀況請不要只等待系統回覆。</b><br>若你現在有立即危險，請立刻找身邊可信任的大人，並撥打 <b>110</b> / <b>119</b> / <b>1925 安心專線</b> / <b>1995 生命線</b>。運動心理教練也會看到這筆立即支持提醒。`;
   }else{
     $("thanks-title").textContent="謝謝你願意說出口 🌱";
     $("thanks-risk").classList.add("hide");
@@ -835,7 +945,7 @@ function renderPsych(){
 
   let list=data.map(r=>({r,light:computeLight(r),analysis:analysisOf(r)}));
   if(["immediate","today","followup","observe"].includes(psychFilter))list=list.filter(x=>x.analysis.urgency===psychFilter);
-  else if(psychFilter==="todo")list=list.filter(x=>x.r.status==="todo");
+  else if(["replied","follow","closed"].includes(psychFilter))list=list.filter(x=>x.r.status===psychFilter);
   // 排序：急迫分流 > 風險 > 紅黃綠 > 時間
   const urgOrd={immediate:0,today:1,followup:2,observe:3};
   const ord={red:0,yellow:1,green:2};
@@ -849,7 +959,7 @@ function renderPsych(){
     return `<div class="item ${light}" onclick="openDetail('${r.id}')">
       <div class="h">
         <div><span class="nm">${esc(r.name)}</span>
-          ${r.risk?'<span class="risk-badge">⚠ 高風險</span>':''}
+          ${r.risk?'<span class="risk-badge">⚠ 立即支持</span>':''}
         </div>
         <span class="light ${light}"><span class="b"></span>${light==="red"?"紅燈":light==="yellow"?"黃燈":"綠燈"}</span>
       </div>
@@ -861,9 +971,9 @@ function renderPsych(){
       </div>
       <div class="mood-tag">📌 ${esc(analysis.summary)}</div>
       <div style="margin-top:8px;display:flex;gap:7px;align-items:center">
-        <span class="status-tag ${r.status==='done'?'done':r.status==='follow'?'follow':r.status==='refer'?'refer':''}">${st.n}</span>
-        ${r.wantReply?'<span class="status-tag">想要回覆</span>':''}
-        ${r.reply?'<span class="status-tag done">已寫回覆</span>':''}
+        <span class="status-tag ${r.status==='replied'?'done':r.status==='follow'?'follow':r.status==='refer'?'refer':''}">${st.n}</span>
+        ${(r.wantsReply||r.wantReply)?'<span class="status-tag">想要回覆</span>':''}
+        ${(r.reply||r.psychologistReply)?'<span class="status-tag done">已寫回覆</span>':''}
       </div>
     </div>`;
   }).join("");
@@ -874,6 +984,7 @@ function openDetail(id){
   const data=load();const r=data.find(x=>x.id===id);if(!r)return;
   const light=computeLight(r);
   const analysis=analysisOf(r);
+  r.scales = r.scales || derivedScales(r.mood, r.stress || []);
   const scaleHtml=SCALES.map(s=>`<div class="mini"><div class="l">${s.n}</div><div class="v">${r.scales[s.k]}<span style="font-size:11px;color:var(--muted)">/5</span></div></div>`).join("");
   const stressHtml=(r.stress||[]).length?r.stress.map(s=>`<span class="status-tag">${s}</span>`).join(" "):'<span class="muted">未選</span>';
   const issueHtml=analysis.issueTypes.map(s=>`<span class="status-tag">${esc(s)}</span>`).join(" ");
@@ -881,7 +992,7 @@ function openDetail(id){
     ? analysis.keyQuotes.map(q=>`<div class="qa"><div class="a">${esc(q)}</div></div>`).join("")
     : '<div class="muted">沒有可擷取的關鍵句。</div>';
   const aiBtns=Object.keys(AI_TEMPLATES).map(k=>`<button class="btn ghost sm" onclick="aiDraft('${id}','${k}')">${k}</button>`).join("");
-  r.status=r.status||"todo";
+  r.status=r.status||"new";
   const statusBtns=STATUSES.map(s=>`<button class="btn ${r.status===s.k?'navy':'ghost'} sm" onclick="setStatus('${id}','${s.k}')">${s.n}</button>`).join("");
 
   $("modal-content").innerHTML=`
@@ -891,7 +1002,7 @@ function openDetail(id){
       <span class="light ${light}"><span class="b"></span>${light==="red"?"紅燈":light==="yellow"?"黃燈":"綠燈"}</span>
     </div>
     <div class="muted" style="font-size:13px;margin-bottom:14px">${esc(r.team||"—")} ｜ ${r.date} ｜ 心情：${MOODS[r.mood].k}</div>
-    ${r.risk?`<div class="alert danger"><b>⚠ 高風險警示</b><br>偵測到可能的高風險語句，請<b>優先且立即關心</b>，必要時通知主要教練／轉介專業協助。本系統非醫療診斷工具。</div>`:""}
+    ${r.risk?`<div class="alert danger"><b>⚠ 立即支持</b><br>偵測到可能的立即安全疑慮，請先做安全確認。若有立即危險，請提醒選手找可信任大人並撥打 110 / 119 / 1925 / 1995。本系統不是醫療診斷工具。</div>`:""}
 
     <div class="section-label" style="margin-top:0"><span class="dot"></span>AI 分流摘要</div>
     <div class="summary-box">
@@ -912,17 +1023,16 @@ function openDetail(id){
     <div class="section-label"><span class="dot"></span>壓力來源</div>
     <div>${stressHtml}</div>
 
-    <div class="section-label"><span class="dot"></span>解憂信箱內容</div>
-    <div class="qa"><div class="q">今天最想丟進信箱的是什麼？</div><div class="a">${esc(r.q1)||'<span class="muted">（未填）</span>'}</div></div>
-    <div class="qa"><div class="q">你最希望有人懂你哪一點？</div><div class="a">${esc(r.q2)||'<span class="muted">（未填）</span>'}</div></div>
-    <div class="qa"><div class="q">你希望運動心理教練怎麼幫你？</div><div class="a">${esc(r.q3)||'<span class="muted">（未填）</span>'}</div></div>
+    <div class="section-label"><span class="dot"></span>補給站留言內容</div>
+    <div class="qa"><div class="q">選手原文</div><div class="a">${esc(r.message||r.q1)||'<span class="muted">（未填）</span>'}</div></div>
 
     <div class="section-label"><span class="dot"></span>處理狀態</div>
     <div class="btn-row">${statusBtns}</div>
 
     <div class="section-label"><span class="dot"></span>運動心理教練回覆</div>
     <div class="ai-buttons" style="margin-bottom:10px">${aiBtns}</div>
-    <textarea id="reply-box" placeholder="寫下你想對這位選手說的話…">${esc(r.reply)}</textarea>
+    <textarea id="reply-box" placeholder="1. 我聽到你說的是……&#10;2. 這不是你不努力，而是……&#10;3. 今天先做一件小事……&#10;4. 下次我們追蹤……">${esc(r.psychologistReply||r.reply)}</textarea>
+    <div style="margin-top:10px"><label class="field">追蹤日期（可選）</label><input type="date" id="follow-date" value="${esc(r.followUpDate||"")}"></div>
     <button class="btn navy" style="margin-top:12px" onclick="saveReply('${id}')">儲存回覆並標記已回覆</button>
     <button class="btn ghost" style="margin-top:10px" onclick="closeModal()">關閉</button>
   `;
@@ -940,15 +1050,17 @@ function aiDraft(id,type){
 }
 function setStatus(id,st){
   const data=load();const r=data.find(x=>x.id===id);if(!r)return;
-  r.status=st;save(data);openDetail(id);renderPsych();
-  if(CLOUD){ serverPost({action:"update",id,fields:{status:st}}).catch(e=>console.warn("雲端更新失敗",e)); }
+  r.status=st;r.updatedAt=new Date().toISOString();save(data);openDetail(id);renderPsych();
+  if(CLOUD){ serverPost({action:"update",id,fields:{status:st,updatedAt:r.updatedAt}}).catch(e=>console.warn("雲端更新失敗",e)); }
 }
 function saveReply(id){
   const data=load();const r=data.find(x=>x.id===id);if(!r)return;
-  r.reply=$("reply-box").value.trim();
-  if(r.reply){r.status="done";r.replyTs=new Date().toISOString();}
+  r.psychologistReply=$("reply-box").value.trim();
+  r.reply=r.psychologistReply;
+  r.followUpDate=$("follow-date").value||"";
+  if(r.reply){r.status="replied";r.replyTs=new Date().toISOString();r.updatedAt=new Date().toISOString();}
   save(data);renderPsych();closeModal();
-  if(CLOUD){ serverPost({action:"update",id,fields:{reply:r.reply,status:r.status,replyTs:r.replyTs}}).catch(e=>console.warn("雲端更新失敗",e)); }
+  if(CLOUD){ serverPost({action:"update",id,fields:{reply:r.reply,psychologistReply:r.psychologistReply,status:r.status,replyTs:r.replyTs,followUpDate:r.followUpDate,updatedAt:r.updatedAt}}).catch(e=>console.warn("雲端更新失敗",e)); }
   alert("已儲存回覆 ✅");
 }
 
@@ -962,17 +1074,25 @@ function renderCoach(){
   let arr=Object.values(latest).map(r=>({r,light:computeLight(r),analysis:analysisOf(r)}));
   const counts={red:0,yellow:0,green:0,risk:0};
   const issueCounts={};
+  const followCount=arr.filter(({r,analysis})=>r.status==="follow" || r.status==="refer" || analysis.urgency==="immediate").length;
   arr.forEach(({r,light,analysis})=>{
     counts[light]++; if(r.risk) counts.risk++;
-    analysis.issueTypes.forEach(t=>{if(t!=="高風險危機") issueCounts[t]=(issueCounts[t]||0)+1;});
+    analysis.issueTypes.forEach(t=>{if(t!=="立即安全支持") issueCounts[t]=(issueCounts[t]||0)+1;});
   });
   const mainLight = counts.red ? "red" : counts.yellow ? "yellow" : "green";
   const topIssues=Object.entries(issueCounts).sort((a,b)=>b[1]-a[1]).slice(0,4);
   const topAdvice = counts.red
-    ? "今天請降低公開壓力，不公開點名、不追問個人私事；訓練以穩定情緒與安全感為優先，必要時請運動心理教練個別接手。"
+    ? "今日團隊壓力偏高，建議減少公開責備，不公開點名、不追問個人私事；訓練以穩定情緒與安全感為優先。"
     : counts.yellow
-    ? "今天適合多給明確肯定與小目標，避免用比較、責備或臨時加量刺激團隊壓力。"
+    ? "建議訓練前安排 3 分鐘收心，多給明確肯定與小目標，避免用比較、責備或臨時加量刺激團隊壓力。"
     : "團隊整體穩定，可以維持正向氣氛與正常訓練節奏。";
+  const trainingAdjust = counts.red
+    ? "今日疲勞或壓力偏高，建議降低懲罰式體能，減少臨時加量，保留一段恢復與整理時間。"
+    : topIssues.some(([name])=>name.includes("比賽"))
+    ? "有選手反映比賽焦慮，建議明確化比賽目標，把結果目標拆成可控制的動作目標。"
+    : counts.yellow
+    ? "可維持訓練，但把回饋改成具體行為描述，避免籠統責備。"
+    : "可維持正常訓練，並保留短時間讓選手回報身心狀態。";
   const issueHtml=topIssues.length
     ? topIssues.map(([name,count],i)=>`<div class="mini"><div class="l">${i+1}. ${esc(name)}</div><div class="v">${count}<span style="font-size:11px;color:var(--muted)"> 件</span></div></div>`).join("")
     : `<div class="muted">目前沒有明顯團隊壓力來源。</div>`;
@@ -984,6 +1104,10 @@ function renderCoach(){
         <span class="light ${mainLight}"><span class="b"></span>${mainLight==="red"?"今日建議放慢":mainLight==="yellow"?"今日建議觀察":"今日狀態穩定"}</span>
       </div>
       ${counts.risk?`<div class="alert danger" style="margin-top:12px">有高風險訊號，請運動心理教練優先處理。教練端仍不顯示個人私密內容。</div>`:""}
+      <div class="summary-box" style="margin-top:12px">
+        <div class="t">需要心理教練追蹤人數</div>
+        <div class="a">${followCount} 人。帶隊教練不顯示個人內容。</div>
+      </div>
     </div>
     <div class="card">
       <h2>團隊壓力來源排行</h2>
@@ -996,7 +1120,10 @@ function renderCoach(){
         <span class="light ${mainLight}"><span class="b"></span>${mainLight==="red"?"放慢":mainLight==="yellow"?"觀察":"穩定"}</span>
       </div>
       <div class="say-box good" style="margin-top:12px;margin-bottom:0">
-        <div class="t">建議做法</div>${topAdvice}
+        <div class="t">今日帶隊提醒</div>${topAdvice}
+      </div>
+      <div class="say-box good" style="margin-top:10px;margin-bottom:0">
+        <div class="t">建議訓練調整</div>${trainingAdjust}
       </div>
       <div class="say-box avoid" style="margin-top:10px;margin-bottom:0">
         <div class="t">避免做法</div>不要在全隊面前要求選手說明情緒、不用「你是不是有問題」這類問法，也不要用成績或同儕比較逼問。
@@ -1008,22 +1135,24 @@ function renderCoach(){
 function seedDemo(){
   if(load().length && !confirm("將加入示範資料，確定？")) return;
   const demo=[
-    {name:"小恩",team:"跆拳道隊",mood:5,needType:"talk",scales:{confidence:2,focus:2,motivation:1,anxiety:4,fatigue:5,sleep:2},
-     stress:["教練","比賽","體重控制"],q1:"一直減重又練不好，覺得自己撐不下去了。",q2:"希望有人懂我真的盡力了。",q3:"想要有人聽我說，不要再罵我。",wantReply:true},
-    {name:"阿哲",team:"田徑隊",mood:3,needType:"advice",scales:{confidence:3,focus:3,motivation:3,anxiety:5,fatigue:3,sleep:3},
-     stress:["比賽"],q1:"下週就要比賽了，很怕表現不好讓教練失望。",q2:"希望被理解我的緊張不是不認真。",q3:"教我怎麼不要那麼焦慮。",wantReply:true},
-    {name:"小婷",team:"跆拳道隊",mood:0,needType:"listen",scales:{confidence:4,focus:4,motivation:4,anxiety:2,fatigue:1,sleep:4},
-     stress:["訓練"],q1:"課業有點忙但還行。",q2:"沒特別。",q3:"想跟教練分享我最近進步了！",wantReply:false},
-    {name:"宇翔",team:"武術隊",mood:3,needType:"family",scales:{confidence:2,focus:3,motivation:2,anxiety:3,fatigue:3,sleep:2},
-     stress:["訓練","運動傷害"],q1:"爸媽一直叫我練更久，回家也沒辦法放鬆。",q2:"希望他們知道我也很累。",q3:"幫我跟家人說我需要休息。",wantReply:true},
+    {name:"Demo-小恩",team:"跆拳道隊",mood:0,needType:"adult_help",stress:["教練","比賽","體重控制"],message:"我最怕教練知道的是我其實快撐不下去了，減重又練不好，真的很需要大人幫忙。",wantReply:true},
+    {name:"Demo-阿哲",team:"田徑隊",mood:2,needType:"organize",stress:["比賽"],message:"下週就要比賽了，腦袋很吵，很怕表現不好讓教練失望。",wantReply:true},
+    {name:"Demo-小婷",team:"跆拳道隊",mood:4,needType:"listen",stress:["課業"],message:"我今天還可以，只是課業有點滿，想先把話放在這裡。",wantReply:false},
+    {name:"Demo-宇翔",team:"武術隊",mood:1,needType:"coach_adjust",stress:["家人期待","運動傷害"],message:"爸媽一直叫我練更久，受傷後回家也沒辦法放鬆，希望教練調整方式但不要說是我。",wantReply:true},
   ];
   const data=load();const created=[];
   demo.forEach((d,i)=>{
-    const risk=detectRisk(d.q1+d.q2+d.q3);
+    const risk=detectRisk(d.message) || d.needType==="adult_help";
+    const stress=d.stress||[];
+    const scales=derivedScales(d.mood,stress);
     const rec={id:Date.now()+"-"+i+"-"+Math.random().toString(36).slice(2,5),
-      date:todayStr(),ts:new Date(Date.now()-i*36e5).toISOString(),
-      status:"todo",reply:"",replyTs:"",risk,...d};
+      athleteId:"demo-"+(i+1),teamId:normalizeName(d.team)||"demo-team",
+      date:todayStr(),ts:new Date(Date.now()-i*36e5).toISOString(),createdAt:new Date(Date.now()-i*36e5).toISOString(),updatedAt:new Date().toISOString(),
+      status:"new",reply:"",psychologistReply:"",replyTs:"",followUpDate:"",risk,riskLevel:risk?"immediate":"normal",
+      moodCard:MOODS[d.mood].k,monsterTags:stress,scales,wantsReply:d.wantReply,visibleToCoachSummary:"",demo:true,
+      q1:d.message,q2:"",q3:"",...d};
     rec.analysis=analyzeRecord(rec);
+    rec.visibleToCoachSummary=rec.analysis.summary;
     created.push(rec);data.unshift(rec);
   });
   save(data);renderPsych();
@@ -1033,7 +1162,28 @@ function seedDemo(){
 function exportData(){
   const blob=new Blob([JSON.stringify(load(),null,2)],{type:"application/json"});
   const a=document.createElement("a");a.href=URL.createObjectURL(blob);
-  a.download="解憂信箱_資料_"+todayStr()+".json";a.click();
+  a.download="Athlete_Solace_Box_2_0_備份_"+todayStr()+".json";a.click();
+}
+function exportCoachSafe(){
+  const safe=load().map(r=>{
+    const an=analysisOf(r);
+    return {
+      id:r.id,
+      date:r.date,
+      teamId:r.teamId||normalizeName(r.team)||"",
+      light:computeLight(r),
+      urgency:an.urgency,
+      issueTypes:an.issueTypes,
+      moodCard:r.moodCard||(MOODS[r.mood]?MOODS[r.mood].k:""),
+      monsterTags:r.monsterTags||r.stress||[],
+      visibleToCoachSummary:r.visibleToCoachSummary||an.summary,
+      status:r.status||"new",
+      needsPsychologistFollowUp:an.urgency==="immediate"||r.status==="follow"||r.status==="refer"
+    };
+  });
+  const blob=new Blob([JSON.stringify(safe,null,2)],{type:"application/json"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);
+  a.download="Athlete_Solace_Box_去識別化匯出_"+todayStr()+".json";a.click();
 }
 function importData(e){
   const file=e.target.files&&e.target.files[0];
@@ -1082,22 +1232,23 @@ async function inboxSearch(){
   }
   // 依時間新到舊
   mine.sort((a,b)=>new Date(b.ts)-new Date(a.ts));
-  const replied=mine.filter(r=>r.reply).length;
+  const replied=mine.filter(r=>r.reply||r.psychologistReply).length;
   $("inbox-result").innerHTML=
     `<div class="card" style="text-align:center">
       <h2>嗨，${esc(name)} 👋</h2>
       <p class="muted" style="margin-top:6px">你總共寫了 ${mine.length} 篇，運動心理教練已回覆 ${replied} 篇 💌</p>
     </div>` +
     mine.map(r=>{
-      const replyHtml = r.reply
-        ? `<div class="reply-card"><div class="from">💬 運動心理教練的回覆</div><div class="body">${esc(r.reply)}</div></div>`
-        : (r.wantReply
+      const replyText=r.psychologistReply||r.reply;
+      const replyHtml = replyText
+        ? `<div class="reply-card"><div class="from">💬 運動心理教練的回覆</div><div class="body">${esc(replyText)}</div></div>`
+        : ((r.wantsReply||r.wantReply)
             ? `<div class="waiting">⏳ 運動心理教練還沒回覆，再等等喔。你的心情我們有收到 🤍</div>`
             : `<div class="waiting">這篇你當時沒有要求回覆。需要的話隨時再寫一篇 🙂</div>`);
       return `<div class="inbox-entry">
         <div class="top"><span style="font-weight:800;color:var(--navy)">${MOODS[r.mood]?MOODS[r.mood].e:""} ${r.date}</span>
-          ${r.reply?'<span class="status-tag done">已回覆</span>':'<span class="status-tag">等待中</span>'}</div>
-        <div class="d" style="margin-top:6px">你當時寫：${esc(r.q1)||'（未填困擾）'}</div>
+          ${replyText?'<span class="status-tag done">已回覆</span>':'<span class="status-tag">等待中</span>'}</div>
+        <div class="d" style="margin-top:6px">你當時寫：${esc(r.message||r.q1)||'（未填困擾）'}</div>
         ${replyHtml}
       </div>`;
     }).join("");
@@ -1105,7 +1256,16 @@ async function inboxSearch(){
 
 /* ============ 啟動 ============ */
 $("a-date")&&($("a-date").value=todayStr());
-if(CLOUD){ setSync("☁ 雲端模式","ok"); } else { setSync("💾 本機模式",""); }
+if(CLOUD){
+  setSync("☁ 正式雲端模式","ok");
+  const badge=$("mode-badge"); if(badge) badge.textContent="正式使用模式｜雲端備份";
+} else {
+  setSync("💾 Demo 本機模式","");
+  const badge=$("mode-badge"); if(badge) badge.textContent="Demo mode｜僅本機快取";
+}
+if("serviceWorker" in navigator){
+  navigator.serviceWorker.register("./sw.js").catch(()=>{});
+}
 </script>
 </body>
 </html>

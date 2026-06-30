@@ -16,11 +16,12 @@ const SHEET_NAME = "Records";
 const PROP_KEY = "SOLACE_SHEET_ID";
 
 const HEADERS = [
-  "id","ts","date","name","team","mood",
-  "confidence","focus","motivation","anxiety","fatigue","sleep",
-  "stress","needType","q1","q2","q3","wantReply","risk",
+  "id","athleteId","teamId","date","name","team",
+  "moodCard","monsterTags","needType","message",
+  "riskLevel","wantsReply","visibleToCoachSummary",
+  "psychologistReply","status","followUpDate",
   "issueTypes","urgency","summary","keyQuotes","intervention",
-  "status","reply","replyTs"
+  "createdAt","updatedAt","replyTs","demo"
 ];
 
 // 有新留言時，通知這個信箱（運動心理教練）
@@ -102,7 +103,8 @@ function readAll_(){
   const sh = getSheet_();
   const last = sh.getLastRow();
   if(last < 2) return [];
-  const rows = sh.getRange(2,1,last-1,HEADERS.length).getValues();
+  const width = Math.max(HEADERS.length, sh.getLastColumn());
+  const rows = sh.getRange(2,1,last-1,width).getValues();
   return rows.filter(r=>r[0]).map(rowToObj_).reverse(); // 最新在前
 }
 
@@ -168,42 +170,62 @@ function clearAll_(){
 /* ---- 轉換：物件 <-> 列 ---- */
 function objToRow_(o){
   o = o || {};
-  const sc = o.scales || {};
   return [
-    o.id||"", o.ts||"", o.date||"", o.name||"", o.team||"", (o.mood===0?0:(o.mood||"")),
-    num_(sc.confidence), num_(sc.focus), num_(sc.motivation), num_(sc.anxiety),
-    num_(sc.fatigue), num_(sc.sleep),
-    (o.stress||[]).join("、"), o.needType||"", o.q1||"", o.q2||"", o.q3||"",
-    o.wantReply?"是":"否", o.risk?"高風險":"",
+    o.id||"", o.athleteId||"", o.teamId||"", o.date||"", o.name||"", o.team||"",
+    o.moodCard||"", ((o.monsterTags||o.stress)||[]).join("、"), o.needType||"", o.message||o.q1||"",
+    o.riskLevel||(o.risk?"immediate":"normal"), (o.wantsReply||o.wantReply)?"是":"否", o.visibleToCoachSummary||"",
+    o.psychologistReply||o.reply||"", o.status||"new", o.followUpDate||"",
     ((o.analysis&&o.analysis.issueTypes)||o.issueTypes||[]).join("、"),
     (o.analysis&&o.analysis.urgency)||o.urgency||"",
     (o.analysis&&o.analysis.summary)||o.summary||"",
     ((o.analysis&&o.analysis.keyQuotes)||o.keyQuotes||[]).join("｜"),
     (o.analysis&&o.analysis.intervention)||o.intervention||"",
-    o.status||"todo", o.reply||"", o.replyTs||""
+    o.createdAt||o.ts||"", o.updatedAt||"", o.replyTs||"", o.demo?"是":""
   ];
 }
 function rowToObj_(r){
   const oldStatusAt18 = ["todo","done","follow","refer"].indexOf(String(r[18]||"")) !== -1;
-  if(r.length <= 21 || oldStatusAt18){
+  const previousSchema = String(r[1]||"").indexOf("T") >= 0 && (r[6] === 0 || r[6] || r[19] || r[24]);
+  if(previousSchema && !oldStatusAt18){
+    const analysis = {
+      issueTypes: r[19] ? String(r[19]).split("、").filter(Boolean) : [],
+      urgency: r[20] || "",
+      summary: r[21] || "",
+      keyQuotes: r[22] ? String(r[22]).split("｜").filter(Boolean) : [],
+      intervention: r[23] || ""
+    };
+    const stress = r[12] ? String(r[12]).split("、").filter(Boolean) : [];
     return {
-      id:String(r[0]), ts:r[1], date:r[2], name:r[3], team:r[4], mood:Number(r[5]),
-      scales:{ confidence:Number(r[6]), focus:Number(r[7]), motivation:Number(r[8]),
-               anxiety:Number(r[9]), fatigue:Number(r[10]), sleep:Number(r[11]) },
-      stress: r[12] ? String(r[12]).split("、").filter(Boolean) : [],
-      needType:"", q1:r[13], q2:r[14], q3:r[15],
-      wantReply: r[16]==="是", risk: r[17]==="高風險",
-      analysis:null,
-      status: r[18]||"todo", reply:r[19]||"", replyTs:r[20]||""
+      id:String(r[0]), ts:r[1], createdAt:r[1], updatedAt:"", date:r[2], name:r[3], team:r[4],
+      mood:Number(r[5]), moodCard:"", scales:{ confidence:Number(r[6]), focus:Number(r[7]), motivation:Number(r[8]),
+             anxiety:Number(r[9]), fatigue:Number(r[10]), sleep:Number(r[11]) },
+      stress:stress, monsterTags:stress, needType:r[13]||"", q1:r[14], q2:r[15], q3:r[16], message:r[14]||"",
+      wantReply: r[17]==="是", wantsReply:r[17]==="是", risk: r[18]==="高風險", riskLevel:r[18]==="高風險"?"immediate":"normal",
+      analysis: analysis.urgency ? analysis : null, visibleToCoachSummary:analysis.summary||"",
+      status: r[24]||"new", reply:r[25]||"", psychologistReply:r[25]||"", replyTs:r[26]||"", followUpDate:""
     };
   }
-  const analysis = {
-    issueTypes: r[19] ? String(r[19]).split("、").filter(Boolean) : [],
-    urgency: r[20] || "",
-    summary: r[21] || "",
-    keyQuotes: r[22] ? String(r[22]).split("｜").filter(Boolean) : [],
-    intervention: r[23] || ""
-  };
+  if(r.length > 25 || !oldStatusAt18){
+    const analysis = {
+      issueTypes: r[16] ? String(r[16]).split("、").filter(Boolean) : [],
+      urgency: r[17] || "",
+      summary: r[18] || "",
+      keyQuotes: r[19] ? String(r[19]).split("｜").filter(Boolean) : [],
+      intervention: r[20] || ""
+    };
+    const moodName = r[6] || "";
+    const monsters = r[7] ? String(r[7]).split("、").filter(Boolean) : [];
+    return {
+      id:String(r[0]), athleteId:r[1]||"", teamId:r[2]||"", date:r[3], name:r[4], team:r[5],
+      moodCard:moodName, mood:moodIndex_(moodName), monsterTags:monsters, stress:monsters,
+      needType:r[8]||"", message:r[9]||"", q1:r[9]||"", q2:"", q3:"",
+      riskLevel:r[10]||"", risk:r[10]==="immediate", wantsReply:r[11]==="是", wantReply:r[11]==="是",
+      visibleToCoachSummary:r[12]||"", psychologistReply:r[13]||"", reply:r[13]||"",
+      status:r[14]||"new", followUpDate:r[15]||"",
+      analysis: analysis.urgency ? analysis : null,
+      createdAt:r[21]||"", ts:r[21]||"", updatedAt:r[22]||"", replyTs:r[23]||"", demo:r[24]==="是"
+    };
+  }
   return {
     id:String(r[0]), ts:r[1], date:r[2], name:r[3], team:r[4], mood:Number(r[5]),
     scales:{ confidence:Number(r[6]), focus:Number(r[7]), motivation:Number(r[8]),
@@ -211,11 +233,18 @@ function rowToObj_(r){
     stress: r[12] ? String(r[12]).split("、").filter(Boolean) : [],
     needType:r[13]||"", q1:r[14], q2:r[15], q3:r[16],
     wantReply: r[17]==="是", risk: r[18]==="高風險",
-    analysis: analysis.urgency ? analysis : null,
-    status: r[24]||"todo", reply:r[25]||"", replyTs:r[26]||""
+    message:r[14]||"", athleteId:"", teamId:"",
+    riskLevel:r[17]==="高風險"?"immediate":"normal",
+    analysis: null,
+    status: r[18]||"todo", reply:r[19]||"", psychologistReply:r[19]||"", replyTs:r[20]||"", followUpDate:""
   };
 }
 function num_(v){ return (v===0||v) ? Number(v) : 3; }
+function moodIndex_(name){
+  const moods = ["火山快爆了","電池快沒電","腦袋很吵","想躲起來","今天還可以","我很想贏但很累","我不知道怎麼講"];
+  const idx = moods.indexOf(String(name||""));
+  return idx >= 0 ? idx : 4;
+}
 
 function json_(obj){
   return ContentService.createTextOutput(JSON.stringify(obj))
